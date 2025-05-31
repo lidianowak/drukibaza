@@ -1,8 +1,10 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 
 def home(request):
-    return render(request, 'home.html')
+    return render(request, 'biblioteka/home.html')
 
-def informacje(request):
-    return render(request, 'informacje.html')
+def info(request):
+    return render(request, 'biblioteka/info.html')
+
 
