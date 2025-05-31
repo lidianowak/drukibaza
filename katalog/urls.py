@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from biblioteka.views import home
+from biblioteka import views  # importujemy widoki z naszej aplikacji
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='home'),
+    path('', views.home, name='home'),
+    path('informacje/', views.informacje, name='informacje'),
 ]
