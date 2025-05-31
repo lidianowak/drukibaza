@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-7)80k!lclq=q_7&s5_pr(4ct^$r_s4gym-r+)gaj7m6&of)xje'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['drukibaza.onrender.com','www.bibliografiadrukow.pl', 'bibliografiadrukow.pl']
 
