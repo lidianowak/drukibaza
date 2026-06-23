@@ -3,8 +3,8 @@ from django.urls import path
 from biblioteka.views import home, info
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', home, name='home'),
-    path('info/', info, name='info'),
+    path('', views.home, name='home'),
+    path('baza/', views.baza, name='baza'),
+    path('info/', views.info, name='info'), 
 ]
 
