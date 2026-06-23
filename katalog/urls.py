@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.urls import path
-from biblioteka.views import home, info
+from biblioteka.views import home, baza, info
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('baza/', views.baza, name='baza'),
-    path('info/', views.info, name='info'), 
+    path('admin/', admin.site.urls),
+    path('', home, name='home'),
+    path('baza/', baza, name='baza'),
+    path('info/', info, name='info'),
 ]
 
