@@ -1,25 +1,32 @@
 from django.db import models
 
-class Starodruk(models.Model):
-    tytul_transkrypcja = models.CharField(max_length=255)
-    tytul_transliteracja = models.CharField(max_length=255)
-    autor = models.CharField(max_length=255, blank=True, null=True)
-    miejsce_wydania = models.CharField(max_length=255, blank=True, null=True)
-    data_wydania = models.CharField(max_length=100, blank=True, null=True)
-    drukarnia = models.CharField(max_length=255, blank=True, null=True)
-    format = models.TextField(blank=True, null=True)
-    liczba_kart = models.CharField(max_length=50, blank=True, null=True)
-    liczba_arkuszy = models.CharField(max_length=50, blank=True, null=True)
-    jezyk = models.CharField(max_length=100, blank=True, null=True)
-    gatunek = models.CharField(max_length=255, blank=True, null=True)
-    adresat = models.CharField(max_length=255, blank=True, null=True)
-    okolicznosci_powstania = models.TextField(blank=True, null=True)
-    dodatkowe_informacje = models.TextField(blank=True, null=True)
-    sygnatury = models.TextField(blank=True, null=True)
-    link_do_wersji = models.URLField(blank=True, null=True)
-    miniatura = models.ImageField(upload_to='miniatury/', blank=True, null=True)
+
+class Slownik(models.Model):
+    nazwa = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["nazwa"]
 
     def __str__(self):
-        return self.tytul_transkrypcja
+        return self.nazwa
 
-# Create your models here.
+
+class Jezyk(Slownik):
+
+    class Meta:
+        verbose_name = "Język"
+        verbose_name_plural = "Języki"
+
+
+class Format(Slownik):
+
+    class Meta:
+        verbose_name = "Format"
+        verbose_name_plural = "Formaty"
+
+class Czcionka(Slownik):
+
+    class Meta:
+        verbose_name = "Czcionka"
+        verbose_name_plural = "Czcionki"
