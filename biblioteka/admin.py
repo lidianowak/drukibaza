@@ -1,10 +1,32 @@
 from django.contrib import admin
-from .models import Jezyk, Format, Czcionka
-from .models import Jezyk, Format, Czcionka, Osoba
+from .models import (
+    Jezyk,
+    Format,
+    Czcionka,
+    Osoba,
+    Miejsce,
+    Instytucja,
+    Biblioteka,
+    Wydarzenie,
+    Gatunek,
+    Motyw,
+    Temat,
+)
 
-admin.site.register(Jezyk)
-admin.site.register(Format)
-admin.site.register(Czcionka)
+MODELE = [
+    Jezyk,
+    Format,
+    Czcionka,
+    Osoba,
+    Miejsce,
+    Instytucja,
+    Biblioteka,
+    Wydarzenie,
+    Gatunek,
+    Motyw,
+    Temat,
+]
 
-admin.site.register(Osoba)
+for model in MODELE:
+    admin.site.register(model)
 
