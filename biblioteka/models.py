@@ -146,6 +146,14 @@ class Rekord(models.Model):
         help_text="Automatycznie nadawany sześciocyfrowy identyfikator BiDO."
     )
 
+    miniatura = models.ImageField(
+        verbose_name="Miniatura",
+        upload_to="miniatury/",
+        blank=True,
+        null=True,
+        help_text="Miniatura wyświetlana na karcie rekordu i w wynikach wyszukiwania."
+    )
+
     tytul_skrocony = models.TextField(
         verbose_name="Tytuł skrócony"
     )
@@ -163,12 +171,27 @@ class Rekord(models.Model):
     
     )
 
+    jezyki = models.ManyToManyField(
+        Jezyk,
+        verbose_name="Języki",
+        blank=True
+    )
+
+
     wersja_zdigitalizowana = models.URLField(
         verbose_name="Wersja zdigitalizowana",
         blank=True
     )
 
     # ===== OPIS FIZYCZNY =====
+
+    format = models.ForeignKey(
+        Format,
+        verbose_name="Format",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
 
     liczba_arkuszy = models.DecimalField(
         verbose_name="Liczba arkuszy",
@@ -186,6 +209,12 @@ class Rekord(models.Model):
 
     kolacjonowanie = models.TextField(
         verbose_name="Kolacjonowanie",
+        blank=True
+    )
+
+    czcionki = models.ManyToManyField(
+        Czcionka,
+        verbose_name="Czcionki",
         blank=True
     )
 
