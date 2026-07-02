@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 
 
 class Slownik(models.Model):
@@ -30,14 +31,6 @@ class Czcionka(Slownik):
     class Meta:
         verbose_name = "Czcionka"
         verbose_name_plural = "Czcionki"
-
-
-class Obiekt(models.Model):
-    opis = models.TextField(blank=True)
-    czytaj_wiecej = models.TextField(blank=True)
-
-    class Meta:
-        abstract = True
 
 
 class Obiekt(models.Model):
@@ -141,3 +134,152 @@ class Temat(ObiektNazwany):
         verbose_name = "Temat"
         verbose_name_plural = "Tematy"
 
+class Rekord(models.Model):
+
+    # ===== IDENTYFIKACJA REKORDU =====
+
+ 
+    identyfikator = models.CharField(
+        max_length=6,
+        unique=True,
+        editable=False,
+        help_text="Automatycznie nadawany sześciocyfrowy identyfikator BiDO."
+    )
+
+    tytul_skrocony = models.TextField(
+        verbose_name="Tytuł skrócony"
+    )
+
+    tytul_pelny = models.TextField(
+        verbose_name="Tytuł pełny",
+        blank=True
+
+    )
+    
+    rok_wydania = models.PositiveSmallIntegerField(
+        verbose_name="Data wydania",
+        blank=True,
+        null=True
+    
+    )
+
+    wersja_zdigitalizowana = models.URLField(
+        verbose_name="Wersja zdigitalizowana",
+        blank=True
+    )
+
+    # ===== OPIS FIZYCZNY =====
+
+    liczba_arkuszy = models.DecimalField(
+        verbose_name="Liczba arkuszy",
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True
+    )
+
+    liczba_kart = models.CharField(
+        verbose_name="Liczba kart",
+        max_length=100,
+        blank=True
+    )
+
+    kolacjonowanie = models.TextField(
+        verbose_name="Kolacjonowanie",
+        blank=True
+    )
+
+    ozdobniki = models.TextField(
+        verbose_name="Ozdobniki",
+        blank=True
+    )
+
+    ryciny = models.TextField(
+        verbose_name="Ryciny",
+        blank=True,
+        help_text="Pozostaw puste, jeśli druk nie zawiera rycin."
+    )
+
+    uwagi = models.TextField(
+        verbose_name="Uwagi",
+        blank=True
+    )
+
+    # ===== POWIĄZANIA =====
+
+    pozostale_druki_powiazane = models.TextField(
+        verbose_name="Pozostałe druki powiązane",
+        blank=True,
+        help_text="Można wpisywać opisy bibliograficzne druków spoza bazy BiDO."
+    )
+
+    literatura_przedmiotu = models.TextField(
+        verbose_name="Literatura przedmiotu, opracowania",
+        blank=True
+    )
+
+    bibliografie = models.TextField(
+        verbose_name="Bibliografie",
+        blank=True
+    )
+
+    streszczenie = models.TextField(
+        verbose_name="Streszczenie",
+        blank=True
+    ) 
+
+
+    def __str__(self):
+        return f"{self.identyfikator} — {self.tytul_skrocony}"
+    
+    def save(self, *args, **kwargs):
+        if not self.identyfikator:
+
+            ostatni = Rekord.objects.aggregate(
+                Max("identyfikator")
+            )["identyfikator__max"]
+
+            if ostatni:
+                nowy = int(ostatni) + 1
+            else:
+                nowy = 1
+
+            self.identyfikator = f"{nowy:06d}"
+
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Rekord"
+        verbose_name_plural = "Rekordy"
+
+
+class RelacjaRekordu(models.Model):
+
+    TYPY_RELACJI = [
+        ("wariant", "Wariant"),
+        ("wznowienie", "Wznowienie"),
+    ]
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje"
+    )
+
+    rekord_powiazany = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="powiazane_z"
+    )
+
+    typ = models.CharField(
+        max_length=20,
+        choices=TYPY_RELACJI
+    )
+
+    class Meta:
+        verbose_name = "Relacja rekordu"
+        verbose_name_plural = "Relacje rekordów"
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} → {self.rekord_powiazany.identyfikator} ({self.get_typ_display()})"    
