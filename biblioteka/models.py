@@ -310,5 +310,168 @@ class RelacjaRekordu(models.Model):
         verbose_name = "Relacja rekordu"
         verbose_name_plural = "Relacje rekordów"
 
+class RelacjaOsoby(models.Model):
+
+    TYPY_RELACJI = [
+        ("autor", "Autor"),
+        ("drukarz", "Drukarz"),
+        ("adresat", "Adresat dedykacji"),
+        ("powiazana", "Powiązana osoba"),
+    ]
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje_osob"
+    )
+
+    osoba = models.ForeignKey(
+        Osoba,
+        on_delete=models.CASCADE
+    )
+
+    typ = models.CharField(
+        max_length=20,
+        choices=TYPY_RELACJI
+    )
+
+    class Meta:
+        verbose_name = "Relacja osoby"
+        verbose_name_plural = "Relacje osób"
+
     def __str__(self):
-        return f"{self.rekord.identyfikator} → {self.rekord_powiazany.identyfikator} ({self.get_typ_display()})"    
+        return f"{self.rekord.identyfikator} → {self.osoba} ({self.get_typ_display()})"
+
+class RelacjaMiejsca(models.Model):
+
+    TYPY_RELACJI = [
+        ("wydania", "Miejsce wydania"),
+        ("powiazane", "Powiązane miejsce"),
+    ]
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje_miejsc"
+    )
+
+    miejsce = models.ForeignKey(
+        Miejsce,
+        on_delete=models.CASCADE
+    )
+
+    typ = models.CharField(
+        max_length=20,
+        choices=TYPY_RELACJI
+    )
+
+    class Meta:
+        verbose_name = "Relacja miejsca"
+        verbose_name_plural = "Relacje miejsc"
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} → {self.miejsce} ({self.get_typ_display()})"   
+    
+class RelacjaInstytucji(models.Model):
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje_instytucji"
+    )
+
+    instytucja = models.ForeignKey(
+        Instytucja,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = "Relacja instytucji"
+        verbose_name_plural = "Relacje instytucji"
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} → {self.instytucja}"
+
+
+class RelacjaTematu(models.Model):
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje_tematow"
+    )
+
+    temat = models.ForeignKey(
+        Temat,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = "Relacja tematu"
+        verbose_name_plural = "Relacje tematów"
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} → {self.temat}"
+
+
+class RelacjaGatunku(models.Model):
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje_gatunkow"
+    )
+
+    gatunek = models.ForeignKey(
+        Gatunek,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = "Relacja gatunku"
+        verbose_name_plural = "Relacje gatunków"
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} → {self.gatunek}"
+
+
+class RelacjaWydarzenia(models.Model):
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje_wydarzen"
+    )
+
+    wydarzenie = models.ForeignKey(
+        Wydarzenie,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = "Relacja wydarzenia"
+        verbose_name_plural = "Relacje wydarzeń"
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} → {self.wydarzenie}"
+
+
+class RelacjaMotywu(models.Model):
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="relacje_motywow"
+    )
+
+    motyw = models.ForeignKey(
+        Motyw,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = "Relacja motywu"
+        verbose_name_plural = "Relacje motywów"
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} → {self.motyw}"
