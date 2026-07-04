@@ -24,6 +24,7 @@ from .models import (
     Egzemplarz,
     OpracowanieRekordu,
     Tag,
+    Zalacznik,
 )
 
 from .forms import RekordForm
@@ -114,6 +115,11 @@ class EgzemplarzInline(admin.StackedInline):
     extra = 0
     autocomplete_fields = ["biblioteka"]
 
+class ZalacznikInline(admin.TabularInline):
+    model = Zalacznik
+    extra = 0
+
+
 class OpracowanieRekorduInline(admin.StackedInline):
     model = OpracowanieRekordu
     extra = 0
@@ -186,6 +192,7 @@ class RekordAdmin(admin.ModelAdmin):
     inlines = [
         WersjaZdigitalizowanaInline,
         EgzemplarzInline,
+        ZalacznikInline,
         OpracowanieRekorduInline,
 ]
 
@@ -285,3 +292,4 @@ class WersjaZdigitalizowanaAdmin(admin.ModelAdmin):
         "rekord__identyfikator",
         "link",
     ]
+

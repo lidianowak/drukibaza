@@ -634,6 +634,72 @@ class Egzemplarz(models.Model):
         return f"{self.rekord.identyfikator} – {self.biblioteka}"
 
 
+# ======================================================
+# ZAŁĄCZNIKI
+# ======================================================
+
+class Zalacznik(models.Model):
+
+    TYPY = [
+        ("ozdobniki", "Ozdobniki"),
+        ("ryciny", "Ryciny"),
+        ("uwagi", "Uwagi"),
+        ("literatura_przedmiotu", "Literatura przedmiotu"),
+        ("marginalia", "Marginalia"),
+    ]
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="zalaczniki"
+    )
+
+    egzemplarz = models.ForeignKey(
+        Egzemplarz,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="zalaczniki"
+    )
+
+    typ = models.CharField(
+        max_length=30,
+        choices=TYPY
+    )
+
+    plik = models.FileField(
+        upload_to="zalaczniki/",
+        verbose_name="Plik"
+    )
+
+    nazwa_wyswietlana = models.CharField(
+        verbose_name="Nazwa wyświetlana",
+        max_length=255,
+        blank=True
+    )
+
+    opis = models.CharField(
+        verbose_name="Opis",
+        max_length=255,
+        blank=True
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        verbose_name="Kolejność",
+        default=1
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Załącznik"
+        verbose_name_plural = "Załączniki"
+
+    def __str__(self):
+        return self.nazwa_wyswietlana or self.plik.name.split("/")[-1]
+
+
 # ==========================================================
 # OPRACOWANIE REKORDU
 # ==========================================================

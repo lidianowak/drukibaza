@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'dal',
     'dal_select2',
-    'biblioteka'
+    'biblioteka',
+    'django_addanother',
 ]
 
 MIDDLEWARE = [

@@ -2,6 +2,9 @@ from django import forms
 
 from dal import autocomplete
 
+from django.urls import reverse_lazy
+from django_addanother.widgets import AddAnotherWidgetWrapper
+
 from .models import (
     Rekord,
     Osoba,
@@ -28,8 +31,11 @@ class RekordForm(forms.ModelForm):
         queryset=Osoba.objects.all(),
         required=False,
         label="Autor",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="osoba-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="osoba-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_osoba_add"),
         ),
     )
 
@@ -37,8 +43,11 @@ class RekordForm(forms.ModelForm):
         queryset=Osoba.objects.all(),
         required=False,
         label="Drukarz",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="osoba-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="osoba-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_osoba_add"),
         ),
     )
 
@@ -46,8 +55,11 @@ class RekordForm(forms.ModelForm):
         queryset=Osoba.objects.all(),
         required=False,
         label="Adresat dedykacji",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="osoba-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="osoba-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_osoba_add"),
         ),
     )
 
@@ -55,8 +67,11 @@ class RekordForm(forms.ModelForm):
         queryset=Osoba.objects.all(),
         required=False,
         label="Powiązane osoby",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="osoba-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="osoba-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_osoba_add"),
         ),
     )
 
@@ -64,8 +79,11 @@ class RekordForm(forms.ModelForm):
         queryset=Miejsce.objects.all(),
         required=False,
         label="Miejsce wydania",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="miejsce-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="miejsce-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_miejsce_add"),
         ),
     )
 
@@ -73,8 +91,11 @@ class RekordForm(forms.ModelForm):
         queryset=Miejsce.objects.all(),
         required=False,
         label="Powiązane miejsca",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="miejsce-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="miejsce-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_miejsce_add"),
         ),
     )
 
@@ -82,8 +103,11 @@ class RekordForm(forms.ModelForm):
         queryset=Instytucja.objects.all(),
         required=False,
         label="Powiązane instytucje",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="instytucja-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="instytucja-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_instytucja_add"),
         ),
     )
 
@@ -91,8 +115,11 @@ class RekordForm(forms.ModelForm):
         queryset=Temat.objects.all(),
         required=False,
         label="Temat",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="temat-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="temat-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_temat_add"),
         ),
     )
 
@@ -100,8 +127,11 @@ class RekordForm(forms.ModelForm):
         queryset=Gatunek.objects.all(),
         required=False,
         label="Gatunek",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="gatunek-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="gatunek-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_gatunek_add"),
         ),
     )
 
@@ -109,8 +139,11 @@ class RekordForm(forms.ModelForm):
         queryset=Wydarzenie.objects.all(),
         required=False,
         label="Powiązane wydarzenie",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="wydarzenie-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="wydarzenie-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_wydarzenie_add"),
         ),
     )
 
@@ -118,8 +151,11 @@ class RekordForm(forms.ModelForm):
         queryset=Motyw.objects.all(),
         required=False,
         label="Motywy",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="motyw-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="motyw-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_motyw_add"),
         ),
     )
 
@@ -127,8 +163,11 @@ class RekordForm(forms.ModelForm):
         queryset=Tag.objects.all(),
         required=False,
         label="Tagi",
-        widget=autocomplete.ModelSelect2Multiple(
-            url="tag-autocomplete",
+        widget=AddAnotherWidgetWrapper(
+            autocomplete.ModelSelect2Multiple(
+                url="tag-autocomplete",
+            ),
+            reverse_lazy("admin:biblioteka_tag_add"),
         ),
     )
 
@@ -271,10 +310,14 @@ class RekordForm(forms.ModelForm):
             ]
 
     def save(self, commit=True):
-        rekord = super().save(commit)
+        rekord = super().save(commit=False)
 
-        # Usuwamy dotychczasowe relacje osób
-        RelacjaOsoby.objects.filter(rekord=rekord).delete()
+        if not commit:
+            return rekord
+
+        rekord.save()
+        self.save_m2m()
+
 
         # Autorzy
         for osoba in self.cleaned_data["autor"]:
