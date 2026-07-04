@@ -1,6 +1,11 @@
 from django.db import models
 from django.db.models import Max
+from django.contrib.auth.models import User
 
+
+# ==========================================================
+# KLASY BAZOWE
+# ==========================================================
 
 class Slownik(models.Model):
     nazwa = models.CharField(max_length=100, unique=True)
@@ -11,26 +16,6 @@ class Slownik(models.Model):
 
     def __str__(self):
         return self.nazwa
-
-
-class Jezyk(Slownik):
-
-    class Meta:
-        verbose_name = "Język"
-        verbose_name_plural = "Języki"
-
-
-class Format(Slownik):
-
-    class Meta:
-        verbose_name = "Format"
-        verbose_name_plural = "Formaty"
-
-class Czcionka(Slownik):
-
-    class Meta:
-        verbose_name = "Czcionka"
-        verbose_name_plural = "Czcionki"
 
 
 class Obiekt(models.Model):
@@ -52,13 +37,51 @@ class ObiektNazwany(Obiekt):
         return self.nazwa
 
 
+# ==========================================================
+# SŁOWNIKI
+# ==========================================================
+
+class Jezyk(Slownik):
+
+    class Meta:
+        verbose_name = "Język"
+        verbose_name_plural = "Języki"
+
+
+class Format(Slownik):
+
+    class Meta:
+        verbose_name = "Format"
+        verbose_name_plural = "Formaty"
+
+
+class Czcionka(Slownik):
+
+    class Meta:
+        verbose_name = "Czcionka"
+        verbose_name_plural = "Czcionki"
+
+
+# ==========================================================
+# OBIEKTY
+# ==========================================================
+
 class Osoba(Obiekt):
+
     imiona = models.CharField(max_length=255)
     nazwisko = models.CharField(max_length=255)
+
     warianty = models.TextField(blank=True)
 
-    rok_urodzenia = models.PositiveIntegerField(blank=True, null=True)
-    rok_smierci = models.PositiveIntegerField(blank=True, null=True)
+    rok_urodzenia = models.PositiveIntegerField(
+        blank=True,
+        null=True
+    )
+
+    rok_smierci = models.PositiveIntegerField(
+        blank=True,
+        null=True
+    )
 
     class Meta:
         ordering = ["nazwisko", "imiona"]
@@ -71,28 +94,20 @@ class Osoba(Obiekt):
     @property
     def nazwa_wyswietlana(self):
         return f"{self.imiona} {self.nazwisko}"
-    
-    
+
 
 class Miejsce(ObiektNazwany):
-    
 
     class Meta:
-
         verbose_name = "Miejsce"
         verbose_name_plural = "Miejsca"
-
-
 
 
 class Instytucja(ObiektNazwany):
 
     class Meta:
-
         verbose_name = "Instytucja"
         verbose_name_plural = "Instytucje"
-
-  
 
 
 class Biblioteka(ObiektNazwany):
@@ -102,14 +117,11 @@ class Biblioteka(ObiektNazwany):
         verbose_name_plural = "Biblioteki"
 
 
-
-
 class Wydarzenie(ObiektNazwany):
 
     class Meta:
         verbose_name = "Wydarzenie"
         verbose_name_plural = "Wydarzenia"
-
 
 
 class Gatunek(ObiektNazwany):
@@ -119,13 +131,11 @@ class Gatunek(ObiektNazwany):
         verbose_name_plural = "Gatunki"
 
 
-
 class Motyw(ObiektNazwany):
 
     class Meta:
         verbose_name = "Motyw"
         verbose_name_plural = "Motywy"
-
 
 
 class Temat(ObiektNazwany):
@@ -134,11 +144,16 @@ class Temat(ObiektNazwany):
         verbose_name = "Temat"
         verbose_name_plural = "Tematy"
 
+# ==========================================================
+# REKORD
+# ==========================================================
+
 class Rekord(models.Model):
 
-    # ===== IDENTYFIKACJA REKORDU =====
+    # ======================================================
+    # IDENTYFIKACJA
+    # ======================================================
 
- 
     identyfikator = models.CharField(
         max_length=6,
         unique=True,
@@ -161,14 +176,12 @@ class Rekord(models.Model):
     tytul_pelny = models.TextField(
         verbose_name="Tytuł pełny",
         blank=True
-
     )
-    
+
     rok_wydania = models.PositiveSmallIntegerField(
         verbose_name="Data wydania",
         blank=True,
         null=True
-    
     )
 
     jezyki = models.ManyToManyField(
@@ -178,12 +191,12 @@ class Rekord(models.Model):
     )
 
 
-    wersja_zdigitalizowana = models.URLField(
-        verbose_name="Wersja zdigitalizowana",
-        blank=True
-    )
+    # Wersje zdigitalizowane przechowywane są
+    # w modelu WersjaZdigitalizowana.
 
-    # ===== OPIS FIZYCZNY =====
+    # ======================================================
+    # OPIS FIZYCZNY
+    # ======================================================
 
     format = models.ForeignKey(
         Format,
@@ -234,7 +247,9 @@ class Rekord(models.Model):
         blank=True
     )
 
-    # ===== POWIĄZANIA =====
+    # ======================================================
+    # POWIĄZANIA
+    # ======================================================
 
     pozostale_druki_powiazane = models.TextField(
         verbose_name="Pozostałe druki powiązane",
@@ -255,13 +270,48 @@ class Rekord(models.Model):
     streszczenie = models.TextField(
         verbose_name="Streszczenie",
         blank=True
-    ) 
+    )
 
+    # ======================================================
+    # METADANE
+    # ======================================================
+    tagi = models.ManyToManyField(
+        "Tag",
+        blank=True,
+        verbose_name="Tagi"
+    )
+
+
+    status_opracowania = models.CharField(
+        verbose_name="Status opracowania",
+        max_length=30,
+        choices=[
+            ("do_opracowania", "Do opracowania"),
+            ("czesciowo_opracowany", "Częściowo opracowany"),
+            ("opracowany", "Opracowany"),
+        ],
+        default="do_opracowania",
+    )
+
+    data_dodania = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Data dodania"
+    )
+
+    data_ostatniej_modyfikacji = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Data ostatniej modyfikacji"
+    )
+
+    # ======================================================
+    # METODY
+    # ======================================================
 
     def __str__(self):
         return f"{self.identyfikator} — {self.tytul_skrocony}"
-    
+
     def save(self, *args, **kwargs):
+
         if not self.identyfikator:
 
             ostatni = Rekord.objects.aggregate(
@@ -281,6 +331,39 @@ class Rekord(models.Model):
         verbose_name = "Rekord"
         verbose_name_plural = "Rekordy"
 
+# ==========================================================
+# WERSJE ZDIGITALIZOWANE
+# ==========================================================
+
+class WersjaZdigitalizowana(models.Model):
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="wersje_zdigitalizowane"
+    )
+
+    link = models.URLField(
+        verbose_name="Link"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        verbose_name = "Wersja zdigitalizowana"
+        verbose_name_plural = "Wersje zdigitalizowane"
+        ordering = ["kolejnosc", "id"]
+
+    def __str__(self):
+        return self.link
+
+
+# ==========================================================
+# RELACJE
+# ==========================================================
 
 class RelacjaRekordu(models.Model):
 
@@ -309,6 +392,14 @@ class RelacjaRekordu(models.Model):
     class Meta:
         verbose_name = "Relacja rekordu"
         verbose_name_plural = "Relacje rekordów"
+
+    def __str__(self):
+        return (
+            f"{self.rekord.identyfikator} → "
+            f"{self.rekord_powiazany.identyfikator} "
+            f"({self.get_typ_display()})"
+        )
+
 
 class RelacjaOsoby(models.Model):
 
@@ -340,7 +431,11 @@ class RelacjaOsoby(models.Model):
         verbose_name_plural = "Relacje osób"
 
     def __str__(self):
-        return f"{self.rekord.identyfikator} → {self.osoba} ({self.get_typ_display()})"
+        return (
+            f"{self.rekord.identyfikator} → "
+            f"{self.osoba} ({self.get_typ_display()})"
+        )
+
 
 class RelacjaMiejsca(models.Model):
 
@@ -370,8 +465,12 @@ class RelacjaMiejsca(models.Model):
         verbose_name_plural = "Relacje miejsc"
 
     def __str__(self):
-        return f"{self.rekord.identyfikator} → {self.miejsce} ({self.get_typ_display()})"   
-    
+        return (
+            f"{self.rekord.identyfikator} → "
+            f"{self.miejsce} ({self.get_typ_display()})"
+        )
+
+
 class RelacjaInstytucji(models.Model):
 
     rekord = models.ForeignKey(
@@ -474,4 +573,145 @@ class RelacjaMotywu(models.Model):
         verbose_name_plural = "Relacje motywów"
 
     def __str__(self):
-        return f"{self.rekord.identyfikator} → {self.motyw}"
+        return f"{self.rekord.identyfikator} → {self.motyw}"    
+    
+# ==========================================================
+# EGZEMPLARZE
+# ==========================================================
+
+class Egzemplarz(models.Model):
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="egzemplarze"
+    )
+
+    biblioteka = models.ForeignKey(
+        Biblioteka,
+        on_delete=models.PROTECT,
+        verbose_name="Biblioteka"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    sygnatura = models.TextField(
+        verbose_name="Sygnatura",
+        blank=True
+    )
+
+    
+    katalog_biblioteczny = models.URLField(
+        verbose_name="Katalog biblioteczny",
+        blank=True
+    )
+
+    proweniencja = models.TextField(
+        verbose_name="Proweniencja",
+        blank=True
+    )
+
+    oprawa = models.TextField(
+        verbose_name="Oprawa",
+        blank=True
+    )
+
+    marginalia = models.TextField(
+        verbose_name="Marginalia, ślady lektury",
+        blank=True,
+        help_text="Pozostaw puste, jeśli egzemplarz nie zawiera marginaliów ani śladów lektury."
+    )
+
+    class Meta:
+        verbose_name = "Egzemplarz"
+        verbose_name_plural = "Egzemplarze"
+        ordering = ["kolejnosc", "id"]
+
+    def __str__(self):
+        return f"{self.rekord.identyfikator} – {self.biblioteka}"
+
+
+# ==========================================================
+# OPRACOWANIE REKORDU
+# ==========================================================
+
+class OpracowanieRekordu(models.Model):
+
+    SPOSOBY_DODANIA = [
+        ("auto", "Automatycznie"),
+        ("recznie", "Ręcznie"),
+    ]
+
+    rekord = models.ForeignKey(
+        Rekord,
+        on_delete=models.CASCADE,
+        related_name="opracowanie"
+    )
+
+    uzytkownik = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        verbose_name="Użytkownik"
+    )
+
+    imie_nazwisko = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="Imię i nazwisko"
+    )
+
+    sposob_dodania = models.CharField(
+        max_length=20,
+        choices=SPOSOBY_DODANIA,
+        default="auto"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        verbose_name = "Autor opracowania"
+        verbose_name_plural = "Autorzy opracowania"
+        ordering = ["kolejnosc", "id"]
+
+    def __str__(self):
+
+        if self.uzytkownik:
+
+            pelna_nazwa = self.uzytkownik.get_full_name()
+
+            if pelna_nazwa:
+                autor = pelna_nazwa
+            else:
+                autor = self.uzytkownik.username
+
+        else:
+            autor = self.imie_nazwisko
+
+        return f"{self.rekord.identyfikator} → {autor}"
+    
+# ==========================================================
+# METADANE
+# ==========================================================
+
+class Tag(models.Model):
+
+    nazwa = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    class Meta:
+        ordering = ["nazwa"]
+        verbose_name = "Tag"
+        verbose_name_plural = "Tagi"
+
+    def __str__(self):
+        return self.nazwa

@@ -1,5 +1,7 @@
 from django import forms
 
+from dal import autocomplete
+
 from .models import (
     Rekord,
     Osoba,
@@ -16,6 +18,8 @@ from .models import (
     RelacjaGatunku,
     RelacjaWydarzenia,
     RelacjaMotywu,
+    RelacjaRekordu,
+    Tag,
 )
 
 
@@ -23,72 +27,134 @@ class RekordForm(forms.ModelForm):
     autor = forms.ModelMultipleChoiceField(
         queryset=Osoba.objects.all(),
         required=False,
-        label="Autor"
+        label="Autor",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="osoba-autocomplete",
+        ),
     )
 
     drukarz = forms.ModelMultipleChoiceField(
         queryset=Osoba.objects.all(),
         required=False,
-        label="Drukarz"
+        label="Drukarz",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="osoba-autocomplete",
+        ),
     )
 
     adresat_dedykacji = forms.ModelMultipleChoiceField(
         queryset=Osoba.objects.all(),
         required=False,
-        label="Adresat dedykacji"
+        label="Adresat dedykacji",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="osoba-autocomplete",
+        ),
     )
 
     powiazane_osoby = forms.ModelMultipleChoiceField(
         queryset=Osoba.objects.all(),
         required=False,
-        label="Powiązane osoby"
+        label="Powiązane osoby",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="osoba-autocomplete",
+        ),
     )
 
     miejsce_wydania = forms.ModelMultipleChoiceField(
         queryset=Miejsce.objects.all(),
         required=False,
-        label="Miejsce wydania"
+        label="Miejsce wydania",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="miejsce-autocomplete",
+        ),
     )
 
     powiazane_miejsca = forms.ModelMultipleChoiceField(
         queryset=Miejsce.objects.all(),
         required=False,
-        label="Powiązane miejsca"
+        label="Powiązane miejsca",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="miejsce-autocomplete",
+        ),
     )
 
     instytucje = forms.ModelMultipleChoiceField(
         queryset=Instytucja.objects.all(),
         required=False,
-        label="Powiązane instytucje"
+        label="Powiązane instytucje",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="instytucja-autocomplete",
+        ),
     )
 
     tematy = forms.ModelMultipleChoiceField(
         queryset=Temat.objects.all(),
         required=False,
-        label="Temat"
+        label="Temat",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="temat-autocomplete",
+        ),
     )
 
     gatunki = forms.ModelMultipleChoiceField(
         queryset=Gatunek.objects.all(),
         required=False,
-        label="Gatunek"
+        label="Gatunek",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="gatunek-autocomplete",
+        ),
     )
 
     wydarzenia = forms.ModelMultipleChoiceField(
         queryset=Wydarzenie.objects.all(),
         required=False,
-        label="Powiązane wydarzenie"
+        label="Powiązane wydarzenie",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="wydarzenie-autocomplete",
+        ),
     )
 
     motywy = forms.ModelMultipleChoiceField(
         queryset=Motyw.objects.all(),
         required=False,
-        label="Motywy"
+        label="Motywy",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="motyw-autocomplete",
+        ),
+    )
+
+    tagi = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        required=False,
+        label="Tagi",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="tag-autocomplete",
+        ),
+    )
+
+    warianty = forms.ModelMultipleChoiceField(
+        queryset=Rekord.objects.all(),
+        required=False,
+        label="Warianty",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="rekord-autocomplete",
+        ),
+    )
+
+    wznowienia = forms.ModelMultipleChoiceField(
+        queryset=Rekord.objects.all(),
+        required=False,
+        label="Wznowienia",
+        widget=autocomplete.ModelSelect2Multiple(
+            url="rekord-autocomplete",
+        ),
     )
 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+    
 
         if self.instance.pk:
 
@@ -184,6 +250,24 @@ class RekordForm(forms.ModelForm):
 
             self.fields["motywy"].initial = [
                 r.motyw for r in motywy
+            ]
+
+            warianty = RelacjaRekordu.objects.filter(
+                rekord=self.instance,
+                typ="wariant"
+            )
+
+            self.fields["warianty"].initial = [
+                r.rekord_powiazany for r in warianty
+            ]
+
+            wznowienia = RelacjaRekordu.objects.filter(
+                rekord=self.instance,
+                typ="wznowienie"
+            )
+
+            self.fields["wznowienia"].initial = [
+                r.rekord_powiazany for r in wznowienia
             ]
 
     def save(self, commit=True):
@@ -287,6 +371,23 @@ class RekordForm(forms.ModelForm):
                 rekord=rekord,
                 motyw=motyw
             )  
+
+                # Warianty i wznowienia
+        RelacjaRekordu.objects.filter(rekord=rekord).delete()
+
+        for rekord_powiazany in self.cleaned_data["warianty"]:
+            RelacjaRekordu.objects.create(
+                rekord=rekord,
+                rekord_powiazany=rekord_powiazany,
+                typ="wariant"
+            )
+
+        for rekord_powiazany in self.cleaned_data["wznowienia"]:
+            RelacjaRekordu.objects.create(
+                rekord=rekord,
+                rekord_powiazany=rekord_powiazany,
+                typ="wznowienie"
+            )
 
         return rekord
 
