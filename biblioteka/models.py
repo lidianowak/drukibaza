@@ -19,8 +19,29 @@ class Slownik(models.Model):
 
 
 class Obiekt(models.Model):
+
     opis = models.TextField(blank=True)
+
     czytaj_wiecej = models.TextField(blank=True)
+
+    ilustracja = models.ImageField(
+        upload_to="obiekty/",
+        blank=True,
+        null=True,
+        verbose_name="Ilustracja"
+    )
+
+    podpis_ilustracji = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Podpis ilustracji"
+    )
+
+    zrodlo_ilustracji = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Źródło ilustracji"
+    )
 
     class Meta:
         abstract = True
@@ -70,9 +91,13 @@ class Osoba(Obiekt):
 
     imiona = models.CharField(max_length=255)
     nazwisko = models.CharField(max_length=255)
+    kwalifikator = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Kwalifikator"
+    )
 
-    warianty = models.TextField(blank=True)
-
+    
     rok_urodzenia = models.PositiveIntegerField(
         blank=True,
         null=True
@@ -89,11 +114,41 @@ class Osoba(Obiekt):
         verbose_name_plural = "Osoby"
 
     def __str__(self):
-        return f"{self.nazwisko}, {self.imiona}"
+        return self.nazwa_glowna
 
     @property
-    def nazwa_wyswietlana(self):
+    def nazwa_glowna(self):
+        if self.kwalifikator:
+            return f"{self.imiona} {self.nazwisko} ({self.kwalifikator})"
+        
         return f"{self.imiona} {self.nazwisko}"
+
+    
+class WariantNazwyOsoby(models.Model):
+
+        osoba = models.ForeignKey(
+            Osoba,
+            on_delete=models.CASCADE,
+            related_name="warianty_nazw"
+        )
+
+        nazwa = models.CharField(
+            max_length=255,
+            verbose_name="Wariant nazwy"
+        )
+
+        kolejnosc = models.PositiveSmallIntegerField(
+            default=1,
+            verbose_name="Kolejność"
+        )
+
+        class Meta:
+            ordering = ["kolejnosc", "id"]
+            verbose_name = "Wariant nazwy osoby"
+            verbose_name_plural = "Warianty nazw osób"
+
+        def __str__(self):
+            return self.nazwa    
 
 
 class Miejsce(ObiektNazwany):
@@ -102,12 +157,64 @@ class Miejsce(ObiektNazwany):
         verbose_name = "Miejsce"
         verbose_name_plural = "Miejsca"
 
+class WariantNazwyMiejsca(models.Model):
+
+    miejsce = models.ForeignKey(
+        Miejsce,
+        on_delete=models.CASCADE,
+        related_name="warianty_nazw"
+    )
+
+    nazwa = models.CharField(
+        max_length=255,
+        verbose_name="Wariant nazwy"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Wariant nazwy miejsca"
+        verbose_name_plural = "Warianty nazw miejsc"
+
+    def __str__(self):
+        return self.nazwa
+
 
 class Instytucja(ObiektNazwany):
 
     class Meta:
         verbose_name = "Instytucja"
         verbose_name_plural = "Instytucje"
+
+class WariantNazwyInstytucji(models.Model):
+
+    instytucja = models.ForeignKey(
+        Instytucja,
+        on_delete=models.CASCADE,
+        related_name="warianty_nazw"
+    )
+
+    nazwa = models.CharField(
+        max_length=255,
+        verbose_name="Wariant nazwy"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Wariant nazwy instytucji"
+        verbose_name_plural = "Warianty nazw instytucji"
+
+    def __str__(self):
+        return self.nazwa
 
 
 class Biblioteka(ObiektNazwany):
@@ -116,12 +223,64 @@ class Biblioteka(ObiektNazwany):
         verbose_name = "Biblioteka"
         verbose_name_plural = "Biblioteki"
 
+class WariantNazwyBiblioteki(models.Model):
+
+    biblioteka = models.ForeignKey(
+        Biblioteka,
+        on_delete=models.CASCADE,
+        related_name="warianty_nazw"
+    )
+
+    nazwa = models.CharField(
+        max_length=255,
+        verbose_name="Wariant nazwy"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Wariant nazwy biblioteki"
+        verbose_name_plural = "Warianty nazw bibliotek"
+
+    def __str__(self):
+        return self.nazwa
+
 
 class Wydarzenie(ObiektNazwany):
 
     class Meta:
         verbose_name = "Wydarzenie"
         verbose_name_plural = "Wydarzenia"
+
+class WariantNazwyWydarzenia(models.Model):
+
+    wydarzenie = models.ForeignKey(
+        Wydarzenie,
+        on_delete=models.CASCADE,
+        related_name="warianty_nazw"
+    )
+
+    nazwa = models.CharField(
+        max_length=255,
+        verbose_name="Wariant nazwy"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Wariant nazwy wydarzenia"
+        verbose_name_plural = "Warianty nazw wydarzeń"
+
+    def __str__(self):
+        return self.nazwa
 
 
 class Gatunek(ObiektNazwany):
@@ -130,6 +289,32 @@ class Gatunek(ObiektNazwany):
         verbose_name = "Gatunek"
         verbose_name_plural = "Gatunki"
 
+class WariantNazwyGatunku(models.Model):
+
+    gatunek = models.ForeignKey(
+        Gatunek,
+        on_delete=models.CASCADE,
+        related_name="warianty_nazw"
+    )
+
+    nazwa = models.CharField(
+        max_length=255,
+        verbose_name="Wariant nazwy"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Wariant nazwy gatunku"
+        verbose_name_plural = "Warianty nazw gatunków"
+
+    def __str__(self):
+        return self.nazwa
+
 
 class Motyw(ObiektNazwany):
 
@@ -137,12 +322,64 @@ class Motyw(ObiektNazwany):
         verbose_name = "Motyw"
         verbose_name_plural = "Motywy"
 
+class WariantNazwyMotywu(models.Model):
+
+    motyw = models.ForeignKey(
+        Motyw,
+        on_delete=models.CASCADE,
+        related_name="warianty_nazw"
+    )
+
+    nazwa = models.CharField(
+        max_length=255,
+        verbose_name="Wariant nazwy"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Wariant nazwy motywu"
+        verbose_name_plural = "Warianty nazw motywów"
+
+    def __str__(self):
+        return self.nazwa
+
 
 class Temat(ObiektNazwany):
 
     class Meta:
         verbose_name = "Temat"
         verbose_name_plural = "Tematy"
+
+class WariantNazwyTematu(models.Model):
+
+    temat = models.ForeignKey(
+        Temat,
+        on_delete=models.CASCADE,
+        related_name="warianty_nazw"
+    )
+
+    nazwa = models.CharField(
+        max_length=255,
+        verbose_name="Wariant nazwy"
+    )
+
+    kolejnosc = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name="Kolejność"
+    )
+
+    class Meta:
+        ordering = ["kolejnosc", "id"]
+        verbose_name = "Wariant nazwy tematu"
+        verbose_name_plural = "Warianty nazw tematów"
+
+    def __str__(self):
+        return self.nazwa
 
 # ==========================================================
 # REKORD
@@ -640,12 +877,13 @@ class Egzemplarz(models.Model):
 
 class Zalacznik(models.Model):
 
-    TYPY = [
+    SEKCJE = [
         ("ozdobniki", "Ozdobniki"),
         ("ryciny", "Ryciny"),
         ("uwagi", "Uwagi"),
         ("literatura_przedmiotu", "Literatura przedmiotu"),
         ("marginalia", "Marginalia"),
+        ("inne", "Inne"),
     ]
 
     rekord = models.ForeignKey(
@@ -664,9 +902,10 @@ class Zalacznik(models.Model):
         related_name="zalaczniki"
     )
 
-    typ = models.CharField(
+    sekcja = models.CharField(
         max_length=30,
-        choices=TYPY
+        choices=SEKCJE,
+        verbose_name="Sekcja"
     )
 
     plik = models.FileField(

@@ -1,18 +1,39 @@
 from django.contrib import admin
+from django.forms.models import BaseInlineFormSet
+from django.core.exceptions import ValidationError
+
 from .models import (
     Jezyk,
     Format,
     Czcionka,
+
     Osoba,
+    WariantNazwyOsoby,
+
     Miejsce,
+    WariantNazwyMiejsca,
+
     Instytucja,
+    WariantNazwyInstytucji,
+
     Biblioteka,
+    WariantNazwyBiblioteki,
+
     Wydarzenie,
+    WariantNazwyWydarzenia,
+
     Gatunek,
+    WariantNazwyGatunku,
+
     Motyw,
+    WariantNazwyMotywu,
+
     Temat,
+    WariantNazwyTematu,
+
     Rekord,
     WersjaZdigitalizowana,
+
     RelacjaRekordu,
     RelacjaOsoby,
     RelacjaMiejsca,
@@ -21,6 +42,7 @@ from .models import (
     RelacjaGatunku,
     RelacjaWydarzenia,
     RelacjaMotywu,
+
     Egzemplarz,
     OpracowanieRekordu,
     Tag,
@@ -28,6 +50,11 @@ from .models import (
 )
 
 from .forms import RekordForm
+
+
+# ==========================================================
+# Rejestracja prostych słowników
+# ==========================================================
 
 MODELE = [
     Jezyk,
@@ -39,85 +66,60 @@ for model in MODELE:
     admin.site.register(model)
 
 
-@admin.register(Miejsce)
-class MiejsceAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-
-@admin.register(Osoba)
-class OsobaAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwisko",
-        "imiona",
-    ]
-
-
-@admin.register(Instytucja)
-class InstytucjaAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-
-@admin.register(Temat)
-class TematAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-
-@admin.register(Gatunek)
-class GatunekAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-
-@admin.register(Wydarzenie)
-class WydarzenieAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-
-@admin.register(Motyw)
-class MotywAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-@admin.register(Biblioteka)
-class BibliotekaAdmin(admin.ModelAdmin):
-    search_fields = [
-        "nazwa",
-    ]
-
-class RelacjaRekorduInline(admin.TabularInline):
-    model = RelacjaRekordu
-    fk_name = "rekord"
-    extra = 1
-    autocomplete_fields = ["rekord_powiazany"]
+# ==========================================================
+# Inline
+# ==========================================================
 
 class WersjaZdigitalizowanaInline(admin.TabularInline):
     model = WersjaZdigitalizowana
     extra = 0
+
 
 class EgzemplarzInline(admin.StackedInline):
     model = Egzemplarz
     extra = 0
     autocomplete_fields = ["biblioteka"]
 
+class ZalacznikInlineFormSet(BaseInlineFormSet):
+
+    def clean(self):
+        super().clean()
+
+        for form in self.forms:
+
+            if not hasattr(form, "cleaned_data"):
+                continue
+
+            if form.cleaned_data.get("DELETE"):
+                continue
+
+            sekcja = form.cleaned_data.get("sekcja")
+            egzemplarz = form.cleaned_data.get("egzemplarz")
+
+            if sekcja == "marginalia" and not egzemplarz:
+                raise ValidationError(
+                    "Załączniki do marginaliów wymagają wskazania egzemplarza."
+                )
+
+            if sekcja != "marginalia" and egzemplarz:
+                raise ValidationError(
+                    "Egzemplarz można wskazać wyłącznie dla załączników do marginaliów."
+                )
+
+
 class ZalacznikInline(admin.TabularInline):
     model = Zalacznik
+    formset = ZalacznikInlineFormSet
     extra = 0
+
+    fields = [
+        "sekcja",
+        "egzemplarz",
+        "nazwa_wyswietlana",
+        "opis",
+        "plik",
+        "kolejnosc",
+    ]
 
 
 class OpracowanieRekorduInline(admin.StackedInline):
@@ -125,6 +127,138 @@ class OpracowanieRekorduInline(admin.StackedInline):
     extra = 0
     autocomplete_fields = ["uzytkownik"]
 
+
+class WariantNazwyOsobyInline(admin.TabularInline):
+    model = WariantNazwyOsoby
+    extra = 0
+
+
+class WariantNazwyMiejscaInline(admin.TabularInline):
+    model = WariantNazwyMiejsca
+    extra = 0
+
+
+class WariantNazwyInstytucjiInline(admin.TabularInline):
+    model = WariantNazwyInstytucji
+    extra = 0
+
+
+class WariantNazwyBibliotekiInline(admin.TabularInline):
+    model = WariantNazwyBiblioteki
+    extra = 0
+
+
+class WariantNazwyWydarzeniaInline(admin.TabularInline):
+    model = WariantNazwyWydarzenia
+    extra = 0
+
+
+class WariantNazwyGatunkuInline(admin.TabularInline):
+    model = WariantNazwyGatunku
+    extra = 0
+
+
+class WariantNazwyMotywuInline(admin.TabularInline):
+    model = WariantNazwyMotywu
+    extra = 0
+
+
+class WariantNazwyTematuInline(admin.TabularInline):
+    model = WariantNazwyTematu
+    extra = 0
+
+
+# ==========================================================
+# Admin słowników
+# ==========================================================
+
+# ==========================================================
+# Admin słowników
+# ==========================================================
+
+@admin.register(Osoba)
+class OsobaAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyOsobyInline]
+
+    search_fields = [
+        "nazwisko",
+        "imiona",
+    ]
+
+
+@admin.register(Miejsce)
+class MiejsceAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyMiejscaInline]
+
+    search_fields = [
+        "nazwa",
+    ]
+
+
+@admin.register(Instytucja)
+class InstytucjaAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyInstytucjiInline]
+
+    search_fields = [
+        "nazwa",
+    ]
+
+
+@admin.register(Biblioteka)
+class BibliotekaAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyBibliotekiInline]
+
+    search_fields = [
+        "nazwa",
+    ]
+
+
+@admin.register(Temat)
+class TematAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyTematuInline]
+
+    search_fields = [
+        "nazwa",
+    ]
+
+
+@admin.register(Gatunek)
+class GatunekAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyGatunkuInline]
+
+    search_fields = [
+        "nazwa",
+    ]
+
+
+@admin.register(Wydarzenie)
+class WydarzenieAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyWydarzeniaInline]
+
+    search_fields = [
+        "nazwa",
+    ]
+
+
+@admin.register(Motyw)
+class MotywAdmin(admin.ModelAdmin):
+    inlines = [WariantNazwyMotywuInline]
+
+    search_fields = [
+        "nazwa",
+    ]
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    search_fields = [
+        "nazwa",
+    ]
+
+
+# ==========================================================
+# Rekord
+# ==========================================================
 
 @admin.register(Rekord)
 class RekordAdmin(admin.ModelAdmin):
@@ -137,64 +271,64 @@ class RekordAdmin(admin.ModelAdmin):
     ]
 
     fieldsets = (
-    ("Informacje podstawowe", {
-        "fields": (
-            "miniatura",
-            "autor",
-            "tytul_skrocony",
-            "tytul_pelny",
-            "rok_wydania",
-            "miejsce_wydania",
-            "drukarz",
-            "jezyki",
-        )
-    }),
-    ("Opis fizyczny", {
-        "fields": (
-            "format",
-            "liczba_arkuszy",
-            "liczba_kart",
-            "kolacjonowanie",
-            "czcionki",
-            "ozdobniki",
-            "ryciny",
-            "uwagi",
-        )
-    }),
-    ("Powiązania", {
-        "fields": (
-            "adresat_dedykacji",
-            "powiazane_osoby",
-            "instytucje",
-            "powiazane_miejsca",
-            "tematy",
-            "gatunki",
-            "wydarzenia",
-            "warianty",
-            "wznowienia",
-            "pozostale_druki_powiazane",
-            "literatura_przedmiotu",
-            "bibliografie",
-            "streszczenie",
-            "motywy",
-        )
-    }),
-    ("Metadane", {
-        "fields": (
-            "status_opracowania",
-            "tagi",
-            "data_dodania",
-            "data_ostatniej_modyfikacji",
-        )
-    }),
-)
+        ("Informacje podstawowe", {
+            "fields": (
+                "miniatura",
+                "autor",
+                "tytul_skrocony",
+                "tytul_pelny",
+                "rok_wydania",
+                "miejsce_wydania",
+                "drukarz",
+                "jezyki",
+            )
+        }),
+        ("Opis fizyczny", {
+            "fields": (
+                "format",
+                "liczba_arkuszy",
+                "liczba_kart",
+                "kolacjonowanie",
+                "czcionki",
+                "ozdobniki",
+                "ryciny",
+                "uwagi",
+            )
+        }),
+        ("Powiązania", {
+            "fields": (
+                "adresat_dedykacji",
+                "powiazane_osoby",
+                "instytucje",
+                "powiazane_miejsca",
+                "tematy",
+                "gatunki",
+                "wydarzenia",
+                "warianty",
+                "wznowienia",
+                "pozostale_druki_powiazane",
+                "literatura_przedmiotu",
+                "bibliografie",
+                "streszczenie",
+                "motywy",
+            )
+        }),
+        ("Metadane", {
+            "fields": (
+                "status_opracowania",
+                "tagi",
+                "data_dodania",
+                "data_ostatniej_modyfikacji",
+            )
+        }),
+    )
 
     inlines = [
         WersjaZdigitalizowanaInline,
         EgzemplarzInline,
         ZalacznikInline,
         OpracowanieRekorduInline,
-]
+    ]
 
     search_fields = [
         "identyfikator",
@@ -222,6 +356,10 @@ class RekordAdmin(admin.ModelAdmin):
                 kolejnosc=ostatnia + 1
             )
 
+
+# ==========================================================
+# Relacje
+# ==========================================================
 
 @admin.register(RelacjaRekordu)
 class RelacjaRekorduAdmin(admin.ModelAdmin):
@@ -262,6 +400,11 @@ class RelacjaWydarzeniaAdmin(admin.ModelAdmin):
 class RelacjaMotywuAdmin(admin.ModelAdmin):
     autocomplete_fields = ["rekord", "motyw"]
 
+
+# ==========================================================
+# Pozostałe
+# ==========================================================
+
 @admin.register(Egzemplarz)
 class EgzemplarzAdmin(admin.ModelAdmin):
     autocomplete_fields = ["rekord", "biblioteka"]
@@ -271,6 +414,7 @@ class EgzemplarzAdmin(admin.ModelAdmin):
         "sygnatura",
         "biblioteka__nazwa",
     ]
+
 
 @admin.register(OpracowanieRekordu)
 class OpracowanieRekorduAdmin(admin.ModelAdmin):
@@ -284,6 +428,7 @@ class OpracowanieRekorduAdmin(admin.ModelAdmin):
         "imie_nazwisko",
     ]
 
+
 @admin.register(WersjaZdigitalizowana)
 class WersjaZdigitalizowanaAdmin(admin.ModelAdmin):
     autocomplete_fields = ["rekord"]
@@ -292,4 +437,3 @@ class WersjaZdigitalizowanaAdmin(admin.ModelAdmin):
         "rekord__identyfikator",
         "link",
     ]
-
