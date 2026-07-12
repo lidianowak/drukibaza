@@ -14,20 +14,36 @@ from biblioteka.importer.object_parser import ParsedPerson
 
 def find_person(person: ParsedPerson):
     """
-    Szuka osoby w bazie.
-    Zwraca QuerySet.
+    Szuka osoby najpierw po nazwie głównej,
+    a następnie po wariantach nazw.
     """
 
     if person.nazwa:
-        return Osoba.objects.filter(
+        matches = Osoba.objects.filter(
             imiona=person.nazwa,
             nazwisko="",
         )
 
-    return Osoba.objects.filter(
+        if matches.exists():
+            return matches
+
+        return Osoba.objects.filter(
+            warianty_nazw__nazwa=person.nazwa
+        )
+
+    full_name = f"{person.nazwisko}, {person.imiona}"
+
+    matches = Osoba.objects.filter(
         nazwisko=person.nazwisko,
         imiona=person.imiona,
     )
+
+    if matches.exists():
+        return matches
+
+    return Osoba.objects.filter(
+        warianty_nazw__nazwa=full_name
+    ).distinct()
 
 def add_person_variants(osoba: Osoba, person: ParsedPerson):
     """
