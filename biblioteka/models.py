@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Max
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 # ==========================================================
@@ -905,6 +906,7 @@ class Zalacznik(models.Model):
     sekcja = models.CharField(
         max_length=30,
         choices=SEKCJE,
+        default="inne",
         verbose_name="Sekcja"
     )
 
@@ -937,6 +939,23 @@ class Zalacznik(models.Model):
 
     def __str__(self):
         return self.nazwa_wyswietlana or self.plik.name.split("/")[-1]
+    
+    def clean(self):
+        super().clean()
+
+        if self.sekcja == "marginalia" and not self.egzemplarz:
+            raise ValidationError({
+                "egzemplarz": (
+                    "Dla załączników do marginaliów należy wskazać egzemplarz."
+                )
+            })
+
+        if self.sekcja != "marginalia" and self.egzemplarz:
+            raise ValidationError({
+                "egzemplarz": (
+                    "Egzemplarz można wskazać wyłącznie dla załączników do marginaliów."
+                )
+            })
 
 
 # ==========================================================
