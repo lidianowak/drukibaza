@@ -37,7 +37,6 @@ class Command(BaseCommand):
 
             mapped = map_record(record)
 
-            print(mapped["rok_wydania"], type(mapped["rok_wydania"]))
 
             rekord = create_record(mapped)
 

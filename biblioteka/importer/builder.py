@@ -11,7 +11,6 @@ from biblioteka.models import (
     Miejsce,
     WariantNazwyMiejsca,
     Instytucja,
-    WariantNazwyInstytucji,
     Temat,
     Gatunek,
     Motyw,
@@ -23,6 +22,9 @@ from biblioteka.models import (
     WariantNazwyMotywu,
     WariantNazwyWydarzenia,
     WariantNazwyBiblioteki,
+    Jezyk,
+    Format,
+    Czcionka,
 )
 
 from biblioteka.importer.object_parser import (
@@ -473,3 +475,34 @@ def get_or_create_person(person: ParsedPerson):
 
     return create_person(person)
 
+
+def get_or_create_dictionary_object(model, parsed):
+    """
+    Zwraca obiekt słownikowy lub tworzy nowy.
+    """
+
+    obj, _ = model.objects.get_or_create(
+        nazwa=parsed.nazwa,
+    )
+
+    return obj
+
+def get_or_create_language(language):
+    return get_or_create_dictionary_object(
+        Jezyk,
+        language,
+    )
+
+
+def get_or_create_format(format_):
+    return get_or_create_dictionary_object(
+        Format,
+        format_,
+    )
+
+
+def get_or_create_font(font):
+    return get_or_create_dictionary_object(
+        Czcionka,
+        font,
+    )
