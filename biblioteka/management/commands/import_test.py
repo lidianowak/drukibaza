@@ -18,6 +18,8 @@ from biblioteka.importer.builder import (
     get_or_create_institution,
 )
 
+from biblioteka.importer.record_builder import create_record
+
 
 class Command(BaseCommand):
     help = "Test importera BiDO"
@@ -34,6 +36,12 @@ class Command(BaseCommand):
         for record in records:
 
             mapped = map_record(record)
+
+            print(mapped["rok_wydania"], type(mapped["rok_wydania"]))
+
+            rekord = create_record(mapped)
+
+            print(f"REKORD: {rekord.identyfikator}")
 
             print()
             print("=" * 60)
