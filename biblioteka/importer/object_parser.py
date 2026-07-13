@@ -221,3 +221,70 @@ def parse_persons(text):
         )
 
     return people
+
+def parse_places(text):
+    """
+    Parsuje zapis miejsc z formularza BiDO.
+
+    Zwraca listę ParsedPlace.
+    """
+
+    if not text:
+        return []
+
+    places = []
+
+    for place_text in split_list(text):
+
+        nazwa, warianty = split_variants(place_text)
+
+        places.append(
+            ParsedName(
+                nazwa=nazwa,
+                warianty=warianty,
+            )
+        )
+
+    return places
+
+
+def parse_institutions(text):
+    """
+    Parsuje zapis instytucji z formularza BiDO.
+    """
+
+    return parse_named_objects(text)
+
+def parse_themes(text):
+    """
+    Parsuje zapis tematów z formularza BiDO.
+    """
+    return parse_named_objects(text)
+
+
+def parse_genres(text):
+    """
+    Parsuje zapis gatunków z formularza BiDO.
+    """
+    return parse_named_objects(text)
+
+
+def parse_motifs(text):
+    """
+    Parsuje zapis motywów z formularza BiDO.
+    """
+    return parse_named_objects(text)
+
+
+def parse_events(text):
+    """
+    Parsuje zapis wydarzeń z formularza BiDO.
+    """
+    return parse_named_objects(text)
+
+
+def parse_libraries(text):
+    """
+    Parsuje zapis bibliotek z formularza BiDO.
+    """
+    return parse_named_objects(text)
