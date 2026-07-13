@@ -14,6 +14,7 @@ from biblioteka.models import (
     RelacjaGatunku,
     RelacjaMotywu,
     RelacjaWydarzenia,
+    WersjaZdigitalizowana,
 )
 
 from biblioteka.importer.object_parser import (
@@ -246,6 +247,31 @@ def import_format(
     rekord.format = get_or_create_format(parsed[0])
     rekord.save(update_fields=["format"])
 
+def import_digitalizations(
+    rekord,
+    text,
+):
+    """
+    Importuje wersje zdigitalizowane rekordu.
+    """
+
+    if not text:
+        return
+
+    links = [
+        link.strip()
+        for link in text.split(";")
+        if link.strip()
+    ]
+
+    for i, link in enumerate(links, start=1):
+
+        WersjaZdigitalizowana.objects.create(
+            rekord=rekord,
+            link=link,
+            kolejnosc=i,
+        )
+
 
 def create_record(mapped):
     """
@@ -348,6 +374,11 @@ def create_record(mapped):
     import_format(
         rekord,
         mapped.get("format"),
+    )
+
+    import_digitalizations(
+        rekord,
+        mapped.get("linki_digitalizacji"),
     )
 
     return rekord

@@ -8,7 +8,10 @@ HEADER_ROW = 14
 EXAMPLE_ROW = 15
 DATA_START_ROW = 16
 
-def parse_sheet(worksheet):
+def parse_sheet(
+    worksheet,
+    required_column,
+):
     """
     Odczytuje jeden arkusz formularza importu
     i zwraca listę słowników.
@@ -28,7 +31,7 @@ def parse_sheet(worksheet):
         record = dict(zip(headers, row))
 
         # pomijamy niewypełnione wiersze formularza
-        if not record["Tytuł skrócony (transkrypcja)"]:
+        if not record.get(required_column):
             continue
 
         records.append(record)

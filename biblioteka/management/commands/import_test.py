@@ -20,6 +20,9 @@ from biblioteka.importer.builder import (
 
 from biblioteka.importer.record_builder import create_record
 
+from biblioteka.importer.specimen_mapper import map_specimen
+from biblioteka.importer.specimen_builder import create_specimen
+
 
 class Command(BaseCommand):
     help = "Test importera BiDO"
@@ -30,15 +33,29 @@ class Command(BaseCommand):
             Path(r"C:\Users\user\Desktop\drukibaza\formularz importu_BiDO.xlsx")
         )
 
-        records = parse_sheet(wb["Rekordy"])
-        print(f"Liczba rekordów: {len(records)}")
+        records = parse_sheet(
+            wb["Rekordy"],
+            "Tytuł skrócony (transkrypcja)",
+        )
 
+        specimens = parse_sheet(
+            wb["Egzemplarze"],
+            "Biblioteka",
+        )
+
+        print(f"Liczba rekordów: {len(records)}")
+        print(f"Liczba egzemplarzy: {len(specimens)}")
+
+        rekordy = {}
+        
         for record in records:
 
             mapped = map_record(record)
 
 
             rekord = create_record(mapped)
+
+            rekordy[mapped["id_importu"]] = rekord
 
             print(f"REKORD: {rekord.identyfikator}")
 
@@ -66,4 +83,30 @@ class Command(BaseCommand):
                 print(place)
                 print(f"→ {miejsce}")
 
-    
+        print()
+        print("=" * 60)
+        print("IMPORT EGZEMPLARZY")
+        print("=" * 60)
+
+        for specimen in specimens:
+
+            mapped = map_specimen(specimen)
+
+            rekord = rekordy.get(
+                mapped["id_importu"]
+            )
+
+            if rekord is None:
+                raise ValueError(
+                    f"Nie znaleziono rekordu dla {mapped['id_importu']}"
+                )
+
+            create_specimen(
+                rekord,
+                mapped,
+            )
+
+            print(
+                f"{mapped['id_importu']} → "
+                f"{mapped.get('biblioteka')}"
+            )
