@@ -5,7 +5,172 @@ Tworzenie obiektu Rekord
 na podstawie danych z formularza importu.
 """
 
-from biblioteka.models import Rekord
+from biblioteka.models import (
+    Rekord,
+    RelacjaOsoby,
+    RelacjaMiejsca,
+    RelacjaInstytucji,
+    RelacjaTematu,
+    RelacjaGatunku,
+    RelacjaMotywu,
+    RelacjaWydarzenia,
+)
+
+from biblioteka.importer.object_parser import (
+    parse_persons,
+    parse_places,
+    parse_institutions,
+    parse_named_objects,
+)
+
+from biblioteka.importer.builder import (
+    get_or_create_person,
+    get_or_create_place,
+    get_or_create_institution,
+    get_or_create_theme,
+    get_or_create_genre,
+    get_or_create_motif,
+    get_or_create_event,
+)
+
+def import_relations(
+    rekord,
+    text,
+    relation_type,
+    parser,
+    builder,
+    relation_model,
+    relation_field,
+):
+    """
+    Uniwersalny importer relacji.
+    """
+
+    for parsed in parser(text):
+
+        obj = builder(parsed)
+
+        kwargs = {
+           "rekord": rekord,
+           relation_field: obj,
+        }
+
+        if relation_type is not None:
+            kwargs["typ"] = relation_type
+
+        relation_model.objects.create(**kwargs)
+
+def import_person_relations(
+    rekord,
+    text,
+    relation_type,
+):
+    """
+    Importuje relacje osób do rekordu.
+    """
+
+    import_relations(
+        rekord=rekord,
+        text=text,
+        relation_type=relation_type,
+        parser=parse_persons,
+        builder=get_or_create_person,
+        relation_model=RelacjaOsoby,
+        relation_field="osoba",
+    )
+
+def import_place_relations(
+    rekord,
+    text,
+    relation_type,
+):
+    """
+    Importuje relacje miejsc do rekordu.
+    """
+
+    import_relations(
+        rekord=rekord,
+        text=text,
+        relation_type=relation_type,
+        parser=parse_places,
+        builder=get_or_create_place,
+        relation_model=RelacjaMiejsca,
+        relation_field="miejsce",
+    )
+
+def import_institution_relations(
+    rekord,
+    text,
+):
+    import_relations(
+        rekord=rekord,
+        text=text,
+        relation_type=None,
+        parser=parse_institutions,
+        builder=get_or_create_institution,
+        relation_model=RelacjaInstytucji,
+        relation_field="instytucja",
+    )
+
+
+def import_theme_relations(
+    rekord,
+    text,
+):
+    import_relations(
+        rekord=rekord,
+        text=text,
+        relation_type=None,
+        parser=parse_named_objects,
+        builder=get_or_create_theme,
+        relation_model=RelacjaTematu,
+        relation_field="temat",
+    )
+
+
+def import_genre_relations(
+    rekord,
+    text,
+):
+    import_relations(
+        rekord=rekord,
+        text=text,
+        relation_type=None,
+        parser=parse_named_objects,
+        builder=get_or_create_genre,
+        relation_model=RelacjaGatunku,
+        relation_field="gatunek",
+    )
+
+
+def import_motif_relations(
+    rekord,
+    text,
+):
+    import_relations(
+        rekord=rekord,
+        text=text,
+        relation_type=None,
+        parser=parse_named_objects,
+        builder=get_or_create_motif,
+        relation_model=RelacjaMotywu,
+        relation_field="motyw",
+    )
+
+
+def import_event_relations(
+    rekord,
+    text,
+):
+    import_relations(
+        rekord=rekord,
+        text=text,
+        relation_type=None,
+        parser=parse_named_objects,
+        builder=get_or_create_event,
+        relation_model=RelacjaWydarzenia,
+        relation_field="wydarzenie",
+    )
 
 
 def create_record(mapped):
@@ -31,5 +196,65 @@ def create_record(mapped):
         status_opracowania=mapped.get("status_opracowania") or "do_opracowania",
     )
 
+    import_person_relations(
+        rekord,
+        mapped.get("autorzy"),
+        "autor",
+    )
+
+    import_person_relations(
+        rekord,
+        mapped.get("drukarze"),
+        "drukarz",
+    )
+
+    import_person_relations(
+        rekord,
+        mapped.get("adresaci_dedykacji"),
+        "adresat",
+    )
+
+    import_person_relations(
+        rekord,
+        mapped.get("powiazane_osoby"),
+        "powiazana",
+    )
+
+    import_place_relations(
+        rekord,
+        mapped.get("miejsce_wydania"),
+        "wydania",
+    )
+
+    import_place_relations(
+        rekord,
+        mapped.get("powiazane_miejsca"),
+        "powiazane",
+    )
+
+    import_institution_relations(
+    rekord,
+    mapped.get("powiazane_instytucje"),
+    )
+
+    import_theme_relations(
+        rekord,
+        mapped.get("tematy"),
+    )
+
+    import_genre_relations(
+        rekord,
+        mapped.get("gatunki"),
+    )
+
+    import_motif_relations(
+        rekord,
+        mapped.get("motywy"),
+    )
+
+    import_event_relations(
+        rekord,
+        mapped.get("wydarzenia"),
+    )
 
     return rekord
