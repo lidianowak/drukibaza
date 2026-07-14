@@ -15,7 +15,6 @@ from openpyxl import load_workbook as openpyxl_load_workbook
 REQUIRED_SHEETS = [
     "Rekordy",
     "Egzemplarze",
-    "Karty tytułowe",
     "Załączniki",
 ]
 

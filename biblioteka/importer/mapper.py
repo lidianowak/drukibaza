@@ -52,6 +52,8 @@ REKORD_MAP = {
     "Status opracowania": "status_opracowania",
 
     "Uwagi z importu": "uwagi_importu",
+    
+    "Miniatura karty tytułowej (ścieżka)": "miniatura",
 }
 
 def map_record(record):

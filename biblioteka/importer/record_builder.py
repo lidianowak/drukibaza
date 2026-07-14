@@ -37,6 +37,10 @@ from biblioteka.importer.builder import (
     get_or_create_font,
 )
 
+from pathlib import Path
+
+from django.core.files import File
+
 STATUS_MAP = {
     None: "do_opracowania",
     "": "do_opracowania",
@@ -272,6 +276,31 @@ def import_digitalizations(
             kolejnosc=i,
         )
 
+def import_thumbnail(
+    rekord,
+    path,
+):
+    """
+    Importuje miniaturę rekordu.
+    """
+
+    if not path:
+        return
+
+    path = Path(path)
+
+    if not path.exists():
+        print(f"Brak pliku: {path}")
+        return
+
+    with path.open("rb") as f:
+
+        rekord.miniatura.save(
+            path.name,
+            File(f),
+            save=True,
+        )
+
 
 def create_record(mapped):
     """
@@ -379,6 +408,11 @@ def create_record(mapped):
     import_digitalizations(
         rekord,
         mapped.get("linki_digitalizacji"),
+    )
+
+    import_thumbnail(
+        rekord,
+        mapped.get("miniatura"),
     )
 
     return rekord

@@ -23,6 +23,9 @@ from biblioteka.importer.record_builder import create_record
 from biblioteka.importer.specimen_mapper import map_specimen
 from biblioteka.importer.specimen_builder import create_specimen
 
+from biblioteka.importer.attachment_mapper import map_attachment
+from biblioteka.importer.attachment_builder import create_attachment
+
 
 class Command(BaseCommand):
     help = "Test importera BiDO"
@@ -43,8 +46,14 @@ class Command(BaseCommand):
             "Biblioteka",
         )
 
+        attachments = parse_sheet(
+            wb["Załączniki"],
+            "Ścieżka pliku",
+        )
+
         print(f"Liczba rekordów: {len(records)}")
         print(f"Liczba egzemplarzy: {len(specimens)}")
+        print(f"Liczba załączników: {len(attachments)}")
 
         rekordy = {}
         
@@ -109,4 +118,33 @@ class Command(BaseCommand):
             print(
                 f"{mapped['id_importu']} → "
                 f"{mapped.get('biblioteka')}"
+            )
+
+        print()
+        print("=" * 60)
+        print("IMPORT ZAŁĄCZNIKÓW")
+        print("=" * 60)
+
+        for attachment in attachments:
+
+            mapped = map_attachment(attachment)
+
+            rekord = rekordy.get(
+                mapped["id_importu"]
+            )
+
+            if rekord is None:
+                raise ValueError(
+                    f"Nie znaleziono rekordu dla {mapped['id_importu']}"
+                )
+
+            create_attachment(
+                rekord,
+                mapped,
+            )
+
+            print(
+                rekord.identyfikator,
+                "→",
+                mapped["sekcja"],
             )

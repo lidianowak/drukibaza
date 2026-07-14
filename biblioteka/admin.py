@@ -51,6 +51,8 @@ from .models import (
 
 from .forms import RekordForm
 
+from django import forms
+
 
 # ==========================================================
 # Rejestracja prostych słowników
@@ -80,6 +82,35 @@ class EgzemplarzInline(admin.StackedInline):
     extra = 0
     autocomplete_fields = ["biblioteka"]
 
+class RekordZalacznikForm(forms.ModelForm):
+
+    class Meta:
+        model = Zalacznik
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["sekcja"].choices = [
+            c
+            for c in Zalacznik.SEKCJE
+            if c[0] != "marginalia"
+        ]
+
+
+class EgzemplarzZalacznikForm(forms.ModelForm):
+
+    class Meta:
+        model = Zalacznik
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["sekcja"].choices = [
+            ("marginalia", "Marginalia")
+        ]
+
 class ZalacznikInlineFormSet(BaseInlineFormSet):
 
     def clean(self):
@@ -107,14 +138,32 @@ class ZalacznikInlineFormSet(BaseInlineFormSet):
                 )
 
 
-class ZalacznikInline(admin.TabularInline):
+class RekordZalacznikInline(admin.TabularInline):
     model = Zalacznik
+    fk_name = "rekord"
+    form = RekordZalacznikForm
     formset = ZalacznikInlineFormSet
     extra = 0
 
     fields = [
         "sekcja",
         "egzemplarz",
+        "nazwa_wyswietlana",
+        "opis",
+        "plik",
+        "kolejnosc",
+    ]
+
+
+class EgzemplarzZalacznikInline(admin.TabularInline):
+    model = Zalacznik
+    fk_name = "egzemplarz"
+    form = EgzemplarzZalacznikForm
+    formset = ZalacznikInlineFormSet
+    extra = 0
+
+    fields = [
+        "sekcja",
         "nazwa_wyswietlana",
         "opis",
         "plik",
@@ -326,7 +375,7 @@ class RekordAdmin(admin.ModelAdmin):
     inlines = [
         WersjaZdigitalizowanaInline,
         EgzemplarzInline,
-        ZalacznikInline,
+        RekordZalacznikInline,
         OpracowanieRekorduInline,
     ]
 
@@ -408,6 +457,10 @@ class RelacjaMotywuAdmin(admin.ModelAdmin):
 @admin.register(Egzemplarz)
 class EgzemplarzAdmin(admin.ModelAdmin):
     autocomplete_fields = ["rekord", "biblioteka"]
+
+    inlines = [
+        EgzemplarzZalacznikInline,
+    ]
 
     search_fields = [
         "rekord__identyfikator",
