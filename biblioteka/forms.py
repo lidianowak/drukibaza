@@ -180,13 +180,25 @@ class RekordForm(forms.ModelForm):
         ),
     )
 
+    warianty_opis = forms.CharField(
+        required=False,
+        label="Dodatkowe opisy wariantów",
+        widget=forms.Textarea(attrs={"rows": 2}),
+    )
+
     wznowienia = forms.ModelMultipleChoiceField(
         queryset=Rekord.objects.all(),
         required=False,
-        label="Wznowienia",
+        label="Wznowione / wznowienia",
         widget=autocomplete.ModelSelect2Multiple(
             url="rekord-autocomplete",
         ),
+    )
+
+    wznowienia_opis = forms.CharField(
+        required=False,
+        label="Dodatkowe opisy wznowień",
+        widget=forms.Textarea(attrs={"rows": 2}),
     )
 
 
@@ -297,8 +309,16 @@ class RekordForm(forms.ModelForm):
             )
 
             self.fields["warianty"].initial = [
-                r.rekord_powiazany for r in warianty
+                r.rekord_powiazany
+                for r in warianty
+                if r.rekord_powiazany
             ]
+
+            self.fields["warianty_opis"].initial = "\n".join(
+                r.opis
+                for r in warianty
+                if r.opis
+            )
 
             wznowienia = RelacjaRekordu.objects.filter(
                 rekord=self.instance,
@@ -306,8 +326,16 @@ class RekordForm(forms.ModelForm):
             )
 
             self.fields["wznowienia"].initial = [
-                r.rekord_powiazany for r in wznowienia
+                r.rekord_powiazany
+                for r in wznowienia
+                if r.rekord_powiazany
             ]
+
+            self.fields["wznowienia_opis"].initial = "\n".join(
+                r.opis
+                for r in wznowienia
+                if r.opis
+            )
 
     def save(self, commit=True):
         rekord = super().save(commit=False)
@@ -315,8 +343,7 @@ class RekordForm(forms.ModelForm):
         if not commit:
             return rekord
 
-        rekord.save()
-        self.save_m2m()
+        
 
 
         # Autorzy
@@ -415,23 +442,26 @@ class RekordForm(forms.ModelForm):
                 motyw=motyw
             )  
 
-                # Warianty i wznowienia
+       
+
+        # Warianty i wznowienia
         RelacjaRekordu.objects.filter(rekord=rekord).delete()
 
         for rekord_powiazany in self.cleaned_data["warianty"]:
             RelacjaRekordu.objects.create(
                 rekord=rekord,
                 rekord_powiazany=rekord_powiazany,
-                typ="wariant"
+                typ="wariant",
             )
 
         for rekord_powiazany in self.cleaned_data["wznowienia"]:
             RelacjaRekordu.objects.create(
                 rekord=rekord,
                 rekord_powiazany=rekord_powiazany,
-                typ="wznowienie"
+                typ="wznowienie",
             )
 
+    
         return rekord
 
     class Meta:

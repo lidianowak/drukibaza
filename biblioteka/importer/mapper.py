@@ -45,7 +45,7 @@ REKORD_MAP = {
     "Linki do digitalizacji": "linki_digitalizacji",
 
     "Warianty": "warianty",
-    "Wznowienia": "wznowienia",
+    "Wznowione / wznowienia": "wznowienia",
     "Pozostałe druki powiązane": "pozostale_druki_powiazane",
 
     "Tagi": "tagi",

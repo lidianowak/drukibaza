@@ -354,7 +354,11 @@ class RekordAdmin(admin.ModelAdmin):
                 "gatunki",
                 "wydarzenia",
                 "warianty",
+                "warianty_opis",
+
                 "wznowienia",
+                "wznowienia_opis",
+
                 "pozostale_druki_powiazane",
                 "literatura_przedmiotu",
                 "bibliografie",

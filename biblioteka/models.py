@@ -627,14 +627,26 @@ class RelacjaRekordu(models.Model):
         choices=TYPY_RELACJI
     )
 
+    opis = models.TextField(
+        verbose_name="Opis bibliograficzny",
+        blank=True,
+    )
+
     class Meta:
         verbose_name = "Relacja rekordu"
         verbose_name_plural = "Relacje rekordów"
 
     def __str__(self):
+
+        cel = (
+            self.rekord_powiazany.identyfikator
+            if self.rekord_powiazany
+            else self.opis
+        )
+
         return (
             f"{self.rekord.identyfikator} → "
-            f"{self.rekord_powiazany.identyfikator} "
+            f"{cel} "
             f"({self.get_typ_display()})"
         )
 

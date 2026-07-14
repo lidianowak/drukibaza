@@ -26,6 +26,9 @@ from biblioteka.importer.specimen_builder import create_specimen
 from biblioteka.importer.attachment_mapper import map_attachment
 from biblioteka.importer.attachment_builder import create_attachment
 
+from biblioteka.importer.relation_mapper import map_relations
+from biblioteka.importer.relation_builder import create_relations
+
 
 class Command(BaseCommand):
     help = "Test importera BiDO"
@@ -66,31 +69,33 @@ class Command(BaseCommand):
 
             rekordy[mapped["id_importu"]] = rekord
 
-            print(f"REKORD: {rekord.identyfikator}")
-
-            print()
-            print("=" * 60)
-            print(mapped["id_importu"])
-
-            persons = parse_persons(mapped["autorzy"])
-            places = parse_places(mapped["miejsce_wydania"])
-
-            print("AUTORZY:")
-
             
-            for person in persons:
-                osoba = get_or_create_person(person)
+        print()
+        print("=" * 60)
+        print("IMPORT RELACJI")
+        print("=" * 60)
 
-                print(person)
-                print(f"→ {osoba}")
+        for record in records:
 
-            print("MIEJSCE WYDANIA:")
+            mapped = map_record(record)
 
-            for place in places:
-                miejsce = get_or_create_place(place)
+            print("MAPPED:")
+            print(mapped)
 
-                print(place)
-                print(f"→ {miejsce}")
+            relacje = map_relations(mapped)
+
+            print("RELACJE:")
+            print(relacje)
+
+            rekord = rekordy[mapped["id_importu"]]
+
+            create_relations(
+                rekord,
+                relacje,
+                rekordy,
+            )
+
+            print(mapped["id_importu"])
 
         print()
         print("=" * 60)
