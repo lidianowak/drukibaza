@@ -340,11 +340,19 @@ class RekordForm(forms.ModelForm):
     def save(self, commit=True):
         rekord = super().save(commit=False)
 
-        if not commit:
-            return rekord
+        # WAŻNE: Django Admin zawsze woła form.save(commit=False), a potem
+        # sam robi obj.save() i form.save_m2m() osobno (w save_related()).
+        # Jeśli tutaj zrobimy wczesny `return` przy commit=False, cała
+        # logika tworząca RelacjaOsoby / RelacjaMiejsca / itd. NIGDY się
+        # nie wykona w adminie - bez żadnego błędu, bo to poprawny return.
+        # Dlatego zapisujemy rekord i relacje zawsze, niezależnie od `commit`.
+        # Ewentualny drugi obj.save()/save_m2m() wykonany przez Admina
+        # potem jest nieszkodliwy (idempotentny).
+        rekord.save()
+        self.save_m2m()
 
-        
-
+        # Usuwamy dotychczasowe relacje osób (autorzy, drukarze, adresaci, powiązane)
+        RelacjaOsoby.objects.filter(rekord=rekord).delete()
 
         # Autorzy
         for osoba in self.cleaned_data["autor"]:
@@ -444,7 +452,7 @@ class RekordForm(forms.ModelForm):
 
        
 
-        # Warianty i wznowienia
+                # Warianty i wznowienia
         RelacjaRekordu.objects.filter(rekord=rekord).delete()
 
         for rekord_powiazany in self.cleaned_data["warianty"]:
@@ -452,6 +460,7 @@ class RekordForm(forms.ModelForm):
                 rekord=rekord,
                 rekord_powiazany=rekord_powiazany,
                 typ="wariant",
+                opis=self.cleaned_data.get("warianty_opis", ""),
             )
 
         for rekord_powiazany in self.cleaned_data["wznowienia"]:
@@ -459,6 +468,7 @@ class RekordForm(forms.ModelForm):
                 rekord=rekord,
                 rekord_powiazany=rekord_powiazany,
                 typ="wznowienie",
+                opis=self.cleaned_data.get("wznowienia_opis", ""),
             )
 
     
