@@ -24,6 +24,50 @@ def split_values(text):
         if value.strip()
     ]
 
+def create_relation(
+    rekord,
+    value,
+    typ,
+    rekordy,
+):
+    """
+    Tworzy pojedynczą relację rekordu.
+
+    Obsługuje:
+    - R000001
+    - 000123
+    - {opis bibliograficzny}
+    """
+
+    value = value.strip()
+
+    if value.startswith("{") and value.endswith("}"):
+
+        RelacjaRekordu.objects.create(
+            rekord=rekord,
+            typ=typ,
+            opis=value[1:-1].strip(),
+        )
+
+        return
+
+    rekord_powiazany = find_record(
+        value,
+        rekordy,
+    )
+
+    RelacjaRekordu.objects.create(
+        rekord=rekord,
+        rekord_powiazany=rekord_powiazany,
+        typ=typ,
+    )
+
+    RelacjaRekordu.objects.get_or_create(
+        rekord=rekord_powiazany,
+        rekord_powiazany=rekord,
+        typ=typ,
+    )
+
 
 def find_record(value, rekordy):
     """
@@ -33,6 +77,8 @@ def find_record(value, rekordy):
     - R000001 (rekord z importu)
     - 000123 (rekord istniejący)
     """
+
+    print("SZUKAM:", repr(value), type(value))
 
     if value.startswith("R"):
         return rekordy.get(value)
@@ -53,26 +99,18 @@ def create_relations(
 
     for value in split_values(mapped.get("warianty")):
 
-        rekord_powiazany = find_record(
+        create_relation(
+            rekord,
             value,
+            "wariant",
             rekordy,
-        )
-
-        RelacjaRekordu.objects.create(
-            rekord=rekord,
-            rekord_powiazany=rekord_powiazany,
-            typ="wariant",
         )
 
     for value in split_values(mapped.get("wznowienia")):
 
-        rekord_powiazany = find_record(
+        create_relation(
+            rekord,
             value,
+            "wznowienie",
             rekordy,
-        )
-
-        RelacjaRekordu.objects.create(
-            rekord=rekord,
-            rekord_powiazany=rekord_powiazany,
-            typ="wznowienie",
         )

@@ -29,12 +29,28 @@ from biblioteka.importer.attachment_builder import create_attachment
 from biblioteka.importer.relation_mapper import map_relations
 from biblioteka.importer.relation_builder import create_relations
 
+from django.contrib.auth import get_user_model
+
 
 class Command(BaseCommand):
     help = "Test importera BiDO"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--user",
+            required=True,
+            help="Nazwa użytkownika wykonującego import",
+        )
+    
     def handle(self, *args, **options):
 
+        username = options["user"]
+        User = get_user_model()
+
+        uzytkownik = User.objects.get(
+            username=username,
+        )
+        
         wb = load_workbook(
             Path(r"C:\Users\user\Desktop\drukibaza\formularz importu_BiDO.xlsx")
         )
@@ -65,7 +81,10 @@ class Command(BaseCommand):
             mapped = map_record(record)
 
 
-            rekord = create_record(mapped)
+            rekord = create_record(
+                mapped,
+                uzytkownik,
+            )
 
             rekordy[mapped["id_importu"]] = rekord
 

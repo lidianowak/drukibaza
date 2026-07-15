@@ -619,7 +619,9 @@ class RelacjaRekordu(models.Model):
     rekord_powiazany = models.ForeignKey(
         Rekord,
         on_delete=models.CASCADE,
-        related_name="powiazane_z"
+        related_name="powiazane_z",
+        blank=True,
+        null=True,
     )
 
     typ = models.CharField(

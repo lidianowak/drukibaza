@@ -15,6 +15,7 @@ from biblioteka.models import (
     RelacjaMotywu,
     RelacjaWydarzenia,
     WersjaZdigitalizowana,
+    OpracowanieRekordu,
 )
 
 from biblioteka.importer.object_parser import (
@@ -302,7 +303,10 @@ def import_thumbnail(
         )
 
 
-def create_record(mapped):
+def create_record(
+    mapped,
+    uzytkownik,
+):
     """
     Tworzy podstawowy obiekt Rekord.
 
@@ -327,6 +331,13 @@ def create_record(mapped):
             mapped.get("status_opracowania"),
             "do_opracowania",
         ),
+    )
+
+    OpracowanieRekordu.objects.create(
+        rekord=rekord,
+        uzytkownik=uzytkownik,
+        sposob_dodania="import",
+        kolejnosc=1,
     )
 
     import_person_relations(
