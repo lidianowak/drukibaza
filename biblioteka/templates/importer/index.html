@@ -45,10 +45,72 @@
 
 <hr>
 
-<h2>Historia importów</h2>
+
+{% if ostatni_import %}
 
 <p>
-    (tu pojawi się tabela)
+    <a
+        href="{% url 'import-report' ostatni_import %}"
+        target="_blank"
+        class="button"
+    >
+        📄 Otwórz raport
+    </a>
+
+    <a
+        href="{% url 'download-report' ostatni_import %}"
+        class="button"
+    >
+        ⬇ Pobierz raport
+    </a>
 </p>
+
+{% endif %}
+
+<h2>Historia importów</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Użytkownik</th>
+            <th>Status</th>
+            <th>Rekordy</th>
+            <th>Egzemplarze</th>
+            <th>Załączniki</th>
+            <th>Raport</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for import in historia_importow %}
+
+        <tr>
+            <td>{{ import.data_rozpoczecia|date:"Y-m-d H:i" }}</td>
+            <td>{{ import.uzytkownik }}</td>
+            <td>{{ import.get_status_display }}</td>
+            <td>{{ import.liczba_rekordow }}</td>
+            <td>{{ import.liczba_egzemplarzy }}</td>
+            <td>{{ import.liczba_zalacznikow }}</td>
+            <td>
+                <a href="{% url 'download-report' import.pk %}">
+                    📄 Pobierz raport
+                </a>
+            </td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="7">
+                Brak historii importów.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+</table>
 
 {% endblock %}

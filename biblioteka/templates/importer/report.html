@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h1>Raport importu</h1>
+
+<p>
+    <strong>Status:</strong>
+    {{ import_danych.get_status_display }}
+</p>
+
+<p>
+    <strong>Data rozpoczęcia:</strong>
+    {{ import_danych.data_rozpoczecia }}
+</p>
+
+<p>
+    <strong>Użytkownik:</strong>
+    {{ import_danych.uzytkownik }}
+</p>
+
+<hr>
+
+<h2>Zaimportowano</h2>
+
+<ul>
+    <li>Rekordy: {{ import_danych.liczba_rekordow }}</li>
+    <li>Egzemplarze: {{ import_danych.liczba_egzemplarzy }}</li>
+    <li>Załączniki: {{ import_danych.liczba_zalacznikow }}</li>
+</ul>
+
+{% endblock %}

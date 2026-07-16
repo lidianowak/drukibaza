@@ -1,8 +1,10 @@
 from django.urls import path
 
 from .views import (
+    download_report,
     download_template,
     index,
+    report,
 )
 
 urlpatterns = [
@@ -16,5 +18,17 @@ urlpatterns = [
         "download/",
         download_template,
         name="download-template",
+    ),
+
+    path(
+        "report/<int:pk>/",
+        report,
+        name="import-report",
+    ),
+
+    path(
+        "report/<int:pk>/download/",
+        download_report,
+        name="download-report",
     ),
 ]
