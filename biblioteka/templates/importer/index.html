@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h1>Import danych</h1>
+
+<h2>Pobierz formularz importu</h2>
+
+<p>
+    <p>
+    <a
+        href="{% url 'download-template' %}"
+        class="button"
+    >
+        Pobierz formularz XLSX
+    </a>
+    </p>
+</p>
+
+<hr>
+
+<h2>Konwersja CSV → formularz BiDO</h2>
+
+<form>
+    {{ csv_form }}
+    <button type="submit">
+        Konwertuj CSV
+    </button>
+</form>
+
+<hr>
+
+<h2>Import danych</h2>
+
+<form
+    method="post"
+    enctype="multipart/form-data"
+>
+    {% csrf_token %}
+    {{ import_form }}
+    <button type="submit">
+        Importuj
+    </button>
+</form>
+
+<hr>
+
+<h2>Historia importów</h2>
+
+<p>
+    (tu pojawi się tabela)
+</p>
+
+{% endblock %}

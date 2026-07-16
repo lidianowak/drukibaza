@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Max
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 
 # ==========================================================
@@ -1053,3 +1054,71 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.nazwa
+    
+
+# ==========================================================
+# IMPORT DANYCH
+# ==========================================================
+
+
+class ImportDanych(models.Model):
+    """
+    Historia wykonanych importów.
+    """
+
+    STATUSY = [
+        ("w_trakcie", "W trakcie"),
+        ("zakonczony", "Zakończony"),
+        ("blad", "Błąd"),
+    ]
+
+    data_rozpoczecia = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    data_zakonczenia = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    uzytkownik = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+
+    plik = models.FileField(
+        upload_to="importy/",
+    )
+
+    liczba_rekordow = models.PositiveIntegerField(
+        default=0,
+    )
+
+    liczba_egzemplarzy = models.PositiveIntegerField(
+        default=0,
+    )
+
+    liczba_zalacznikow = models.PositiveIntegerField(
+        default=0,
+    )
+
+    czas_trwania = models.DurationField(
+        null=True,
+        blank=True,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUSY,
+        default="w_trakcie",
+    )
+
+    class Meta:
+        verbose_name = "Sesja importu danych"
+        verbose_name_plural = "Sesje importu danych"
+
+    def __str__(self):
+        return (
+            f"Import "
+            f"{self.data_rozpoczecia:%Y-%m-%d %H:%M}"
+        )

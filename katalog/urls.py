@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from biblioteka.autocomplete import (
     OsobaAutocomplete,
     MiejsceAutocomplete,
@@ -17,6 +17,10 @@ from django.conf.urls.static import static
 from biblioteka.views import home, baza, info
 
 urlpatterns = [
+    path(
+        "admin/import/",
+        include("biblioteka.importer.urls"),
+    ),
     path("admin/", admin.site.urls),
 
     path("autocomplete/osoba/", OsobaAutocomplete.as_view(), name="osoba-autocomplete"),
@@ -36,6 +40,9 @@ urlpatterns = [
     TagAutocomplete.as_view(),
     name="tag-autocomplete",
     ),
+
+    
+
 ]
 
 if settings.DEBUG:

@@ -47,11 +47,14 @@ from .models import (
     OpracowanieRekordu,
     Tag,
     Zalacznik,
+
+    ImportDanych,
 )
 
 from .forms import RekordForm
 
 from django import forms
+
 
 
 # ==========================================================
@@ -494,3 +497,35 @@ class WersjaZdigitalizowanaAdmin(admin.ModelAdmin):
         "rekord__identyfikator",
         "link",
     ]
+
+# ==========================================================
+# IMPORT DANYCH
+# ==========================================================
+
+@admin.register(ImportDanych)
+class ImportDanychAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "data_rozpoczecia",
+        "uzytkownik",
+        "status",
+        "liczba_rekordow",
+        "liczba_egzemplarzy",
+        "liczba_zalacznikow",
+    )
+
+    list_filter = (
+        "status",
+        "uzytkownik",
+    )
+
+    search_fields = (
+        "uzytkownik__username",
+    )
+
+    readonly_fields = (
+        "data_rozpoczecia",
+        "data_zakonczenia",
+        "czas_trwania",
+    )
+
