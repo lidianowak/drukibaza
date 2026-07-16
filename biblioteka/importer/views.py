@@ -7,6 +7,8 @@ from django.shortcuts import (
     render,
 )
 
+from django.contrib import messages
+
 from .forms import (
     CsvImportForm,
     ImportForm,
@@ -36,10 +38,24 @@ def index(request):
                 request.FILES["plik"],
             )
 
-            run_import(
-                workbook=workbook,
-                uzytkownik=request.user,
-            )
+            try:
+
+                run_import(
+                    workbook=workbook,
+                    uzytkownik=request.user,
+                )
+
+                messages.success(
+                    request,
+                    "Import zakończył się pomyślnie.",
+                )
+
+            except Exception as e:
+
+                messages.error(
+                    request,
+                    str(e),
+                )
 
             return redirect("import-index")
 

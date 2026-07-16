@@ -18,6 +18,13 @@ from biblioteka.importer.attachment_builder import create_attachment
 from biblioteka.importer.relation_mapper import map_relations
 from biblioteka.importer.relation_builder import create_relations
 
+from django.db import transaction
+
+from biblioteka.importer.result import (
+    ImportResult,
+    ImportErrorItem,
+)
+
 
 def run_import(
     workbook,
@@ -27,121 +34,148 @@ def run_import(
     Wykonuje pełny import danych z formularza.
     """
 
-    records = parse_sheet(
-            workbook["Rekordy"],
-            "Tytuł skrócony (transkrypcja)",
-        )
+    result = ImportResult()
 
-    specimens = parse_sheet(
-            workbook["Egzemplarze"],
-            "Biblioteka",
-        )
-
-    attachments = parse_sheet(
-            workbook["Załączniki"],
-            "Ścieżka pliku",
-        )
-
-    print(f"Liczba rekordów: {len(records)}")
-    print(f"Liczba egzemplarzy: {len(specimens)}")
-    print(f"Liczba załączników: {len(attachments)}")
-
-    rekordy = {}
     
-    for record in records:
+    with transaction.atomic():
 
-        mapped = map_record(record)
+            
 
+        records = parse_sheet(
+                workbook["Rekordy"],
+                "Tytuł skrócony (transkrypcja)",
+            )
 
-        rekord = create_record(
-            mapped,
-            uzytkownik,
-        )
+        specimens = parse_sheet(
+                workbook["Egzemplarze"],
+                "Biblioteka",
+            )
 
-        rekordy[mapped["id_importu"]] = rekord
+        attachments = parse_sheet(
+                workbook["Załączniki"],
+                "Ścieżka pliku",
+            )
 
+        print(f"Liczba rekordów: {len(records)}")
+        print(f"Liczba egzemplarzy: {len(specimens)}")
+        print(f"Liczba załączników: {len(attachments)}")
+
+        result.records = len(records)
+        result.specimens = len(specimens)
+        result.attachments = len(attachments)
+
+        rekordy = {}
         
-    print()
-    print("=" * 60)
-    print("IMPORT RELACJI")
-    print("=" * 60)
+        for record in records:
 
-    for record in records:
+            mapped = map_record(record)
 
-        mapped = map_record(record)
 
-        print("MAPPED:")
-        print(mapped)
-
-        relacje = map_relations(mapped)
-
-        print("RELACJE:")
-        print(relacje)
-
-        rekord = rekordy[mapped["id_importu"]]
-
-        create_relations(
-            rekord,
-            relacje,
-            rekordy,
-        )
-
-        print(mapped["id_importu"])
-
-    print()
-    print("=" * 60)
-    print("IMPORT EGZEMPLARZY")
-    print("=" * 60)
-
-    for specimen in specimens:
-
-        mapped = map_specimen(specimen)
-
-        rekord = rekordy.get(
-            mapped["id_importu"]
-        )
-
-        if rekord is None:
-            raise ValueError(
-                f"Nie znaleziono rekordu dla {mapped['id_importu']}"
+            rekord = create_record(
+                mapped,
+                uzytkownik,
             )
 
-        create_specimen(
-            rekord,
-            mapped,
-        )
+            rekordy[mapped["id_importu"]] = rekord
 
-        print(
-            f"{mapped['id_importu']} → "
-            f"{mapped.get('biblioteka')}"
-        )
+            
+        print()
+        print("=" * 60)
+        print("IMPORT RELACJI")
+        print("=" * 60)
 
-    print()
-    print("=" * 60)
-    print("IMPORT ZAŁĄCZNIKÓW")
-    print("=" * 60)
+        for record in records:
 
-    for attachment in attachments:
+            mapped = map_record(record)
 
-        mapped = map_attachment(attachment)
+            print("MAPPED:")
+            print(mapped)
 
-        rekord = rekordy.get(
-            mapped["id_importu"]
-        )
+            relacje = map_relations(mapped)
 
-        if rekord is None:
-            raise ValueError(
-                f"Nie znaleziono rekordu dla {mapped['id_importu']}"
+            print("RELACJE:")
+            print(relacje)
+
+            rekord = rekordy[mapped["id_importu"]]
+
+            create_relations(
+                rekord,
+                relacje,
+                rekordy,
             )
 
-        create_attachment(
-            rekord,
-            mapped,
-        )
+            print(mapped["id_importu"])
 
-        print(
-            rekord.identyfikator,
-            "→",
-            mapped["sekcja"],
-        )
+        print()
+        print("=" * 60)
+        print("IMPORT EGZEMPLARZY")
+        print("=" * 60)
+
+        for specimen in specimens:
+
+            mapped = map_specimen(specimen)
+
+            rekord = rekordy.get(
+                mapped["id_importu"]
+            )
+
+            if rekord is None:
+                raise ValueError(
+                    f"Nie znaleziono rekordu dla {mapped['id_importu']}"
+                )
+
+            create_specimen(
+                rekord,
+                mapped,
+            )
+
+            print(
+                f"{mapped['id_importu']} → "
+                f"{mapped.get('biblioteka')}"
+            )
+
+        print()
+        print("=" * 60)
+        print("IMPORT ZAŁĄCZNIKÓW")
+        print("=" * 60)
+
+        for attachment in attachments:
+
+            mapped = map_attachment(attachment)
+
+            rekord = rekordy.get(
+                mapped["id_importu"]
+            )
+
+            if rekord is None:
+
+                result.success = False
+
+                result.errors.append(
+                    ImportErrorItem(
+                        message=(
+                            f"Nie znaleziono rekordu "
+                            f"{mapped['id_importu']}"
+                        ),
+                        sheet="Egzemplarze",
+                        field="Id importu",
+                    )
+                )
+
+                raise ValueError(
+                    f"Nie znaleziono rekordu dla {mapped['id_importu']}"
+                )
+
+            create_attachment(
+                rekord,
+                mapped,
+            )
+
+            print(
+                rekord.identyfikator,
+                "→",
+                mapped["sekcja"],
+            )
+
+        return result
                         
