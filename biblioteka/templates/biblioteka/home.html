@@ -25,14 +25,22 @@
             justify-content: center;
             background-color: #ffffff;
             font-family: "Bona Nova", serif;
-            text-align: center;
             padding: 40px 20px;
+        }
+
+        .tekst-blok {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 80px;
         }
 
         .logo {
             max-width: 160px;
             width: 30vw;
-            margin-bottom: 24px;
+            margin-bottom: 40px;
         }
 
         h1 {
@@ -41,12 +49,12 @@
             font-weight: 400;
             font-size: 2rem;
             color: #4a4a4a;
-            margin: 0 0 40px 0;
-            max-width: 600px;
+            margin: 0;
+            text-align: left;
         }
 
         .grafika {
-            max-width: 320px;
+            max-width: 120px;
             width: 80%;
             height: auto;
         }
@@ -55,15 +63,19 @@
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.5rem;
-                margin-bottom: 30px;
             }
 
             .logo {
                 max-width: 130px;
+                margin-bottom: 30px;
+            }
+
+            .tekst-blok {
+                margin-bottom: 60px;
             }
 
             .grafika {
-                max-width: 260px;
+                max-width: 120px;
             }
         }
 
@@ -75,26 +87,31 @@
 
             h1 {
                 font-size: 1.2rem;
-                margin-bottom: 24px;
             }
 
             .logo {
                 max-width: 100px;
-                margin-bottom: 16px;
+                margin-bottom: 20px;
+            }
+
+            .tekst-blok {
+                margin-bottom: 40px;
             }
 
             .grafika {
-                max-width: 200px;
+                max-width: 90px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Logotyp -->
-    <img class="logo" src="{% static 'images/logotyp1.svg' %}" alt="Logo BiDO">
+    <div class="tekst-blok">
+        <!-- Logotyp -->
+        <img class="logo" src="{% static 'images/logotyp1.svg' %}" alt="Logo BiDO">
 
-    <h1>Strona w budowie. Zapraszam wkrótce!</h1>
+        <h1>Strona w budowie. Zapraszam wkrótce!</h1>
+    </div>
 
     <!-- Grafika łabędzia -->
     <img class="grafika" src="{% static 'images/labedz w gniezdzie.svg' %}" alt="Ilustracja łabędzia w gnieździe">
