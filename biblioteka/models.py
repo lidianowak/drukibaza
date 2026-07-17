@@ -1113,6 +1113,12 @@ class ImportDanych(models.Model):
         default="w_trakcie",
     )
 
+    raport = models.FileField(
+        upload_to="import_reports/",
+        blank=True,
+        null=True,
+    )
+
     class Meta:
         verbose_name = "Sesja importu danych"
         verbose_name_plural = "Sesje importu danych"

@@ -8,7 +8,23 @@ class ImportForm(forms.Form):
 
     plik = forms.FileField(
         label="Formularz importu (.xlsx)",
+        widget=forms.ClearableFileInput(
+            attrs={
+                "accept": ".xlsx",
+            }
+        ),
     )
+
+    def clean_plik(self):
+
+        plik = self.cleaned_data["plik"]
+
+        if not plik.name.lower().endswith(".xlsx"):
+            raise forms.ValidationError(
+                "Wybierz plik programu Excel (*.xlsx)."
+            )
+
+        return plik
 
 
 class CsvImportForm(forms.Form):

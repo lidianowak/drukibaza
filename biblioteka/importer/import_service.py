@@ -26,6 +26,7 @@ from biblioteka.importer.result import (
 )
 
 from .validator import ImportValidator
+from .exceptions import ImportValidationError
 
 def run_import(
     workbook,
@@ -84,7 +85,7 @@ def run_import(
             rekordy[mapped["id_importu"]] = rekord
 
         if result.errors:
-            raise ValueError("Import zawiera błędy walidacji.")
+            raise ImportValidationError(result)
 
             
         print()

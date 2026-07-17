@@ -25,6 +25,16 @@ from biblioteka.models import ImportDanych
 
 from django.http import HttpResponse
 
+from django.core.files.base import ContentFile
+
+from .report import build_report
+
+from django.http import FileResponse
+from django.http import Http404
+from .exceptions import ImportValidationError
+
+from zipfile import BadZipFile
+
 
 @staff_member_required
 def index(request):
@@ -43,22 +53,59 @@ def index(request):
                 plik=request.FILES["plik"],
             )
 
-            workbook = load_workbook(
-                request.FILES["plik"],
-            )
-
             try:
+
+                workbook = load_workbook(
+                    request.FILES["plik"],
+                )
 
                 result = run_import(
                     workbook=workbook,
                     uzytkownik=request.user,
                 )
 
-                import_danych.liczba_rekordow = result.records
-                import_danych.liczba_egzemplarzy = result.specimens
-                import_danych.liczba_zalacznikow = result.attachments
+                ...
 
-                import_danych.status = "zakonczony"
+            except ImportValidationError as e:
+
+                result = e.result
+
+                import_danych.status = "blad"
+
+                import_danych.data_zakonczenia = timezone.now()
+
+                import_danych.czas_trwania = (
+                    import_danych.data_zakonczenia
+                    - import_danych.data_rozpoczecia
+                )
+
+                report = build_report(
+                    import_danych,
+                    result,
+                )
+
+                filename = (
+                    f"raport_importu_{import_danych.pk}.txt"
+                )
+
+                import_danych.raport.save(
+                    filename,
+                    ContentFile(report.encode("utf-8")),
+                    save=False,
+                )
+
+                import_danych.save()
+
+                request.session["ostatni_import"] = import_danych.pk
+
+                messages.error(
+                    request,
+                    str(e),
+                )
+
+            except BadZipFile:
+
+                import_danych.status = "blad"
 
                 import_danych.data_zakonczenia = timezone.now()
 
@@ -71,11 +118,11 @@ def index(request):
 
                 request.session["ostatni_import"] = import_danych.pk
 
-                messages.success(
+                messages.error(
                     request,
-                    "Import zakończył się pomyślnie.",
+                    "Wybrany plik nie jest poprawnym plikiem programu Excel (.xlsx).",
                 )
-
+            
             except Exception as e:
 
                 import_danych.status = "blad"
@@ -89,16 +136,18 @@ def index(request):
 
                 import_danych.save()
 
+                request.session["ostatni_import"] = import_danych.pk
+
                 messages.error(
                     request,
                     str(e),
-                )
+                )       
 
             return redirect("import-index")
 
     historia_importow = (
         ImportDanych.objects
-        .order_by("-data_rozpoczecia")[:10]
+        .order_by("-data_rozpoczecia")[:30]
     )
 
     ostatni_import = request.session.pop(
@@ -106,11 +155,14 @@ def index(request):
         None,
     )
 
+    if request.method != "POST":
+        import_form = ImportForm()
+
     return render(
         request,
         "importer/index.html",
         {
-            "import_form": ImportForm(),
+            "import_form": import_form,
             "csv_form": CsvImportForm(),
             "historia_importow": historia_importow,
             "ostatni_import": ostatni_import,
@@ -140,7 +192,7 @@ def download_template(request):
         ),
     )
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+    timestamp = timezone.localtime().strftime("%Y-%m-%d_%H-%M")
 
     username = request.user.username
 
@@ -160,15 +212,20 @@ def download_template(request):
 @staff_member_required
 def report(request, pk):
 
-    import_danych = ImportDanych.objects.get(
-        pk=pk,
-    )
+    import_danych = ImportDanych.objects.get(pk=pk)
+
+    report = ""
+
+    if import_danych.raport:
+        with import_danych.raport.open("rb") as f:
+            report = f.read().decode("utf-8")
 
     return render(
         request,
         "importer/report.html",
         {
             "import_danych": import_danych,
+            "report": report,
         },
     )
 
@@ -180,35 +237,16 @@ def download_report(request, pk):
         pk=pk,
     )
 
-    lines = [
-        "RAPORT IMPORTU",
-        "",
-        f"Status: {import_danych.get_status_display()}",
-        f"Data: {import_danych.data_rozpoczecia}",
-        f"Użytkownik: {import_danych.uzytkownik}",
-        "",
-        "ZAIMPORTOWANO",
-        f"Rekordy: {import_danych.liczba_rekordow}",
-        f"Egzemplarze: {import_danych.liczba_egzemplarzy}",
-        f"Załączniki: {import_danych.liczba_zalacznikow}",
-    ]
+    if not import_danych.raport:
+        raise Http404("Raport nie istnieje.")
 
-    response = HttpResponse(
-        "\n".join(lines),
+    response = FileResponse(
+        import_danych.raport.open("rb"),
         content_type="text/plain",
     )
 
-    timestamp = import_danych.data_rozpoczecia.strftime(
-    "%Y-%m-%d_%H-%M-%S"
-    )
-
-    filename = (
-        f"raport_importu_"
-        f"{timestamp}.txt"
-    )
-
     response["Content-Disposition"] = (
-        f'attachment; filename="{filename}"'
+        f'attachment; filename="{import_danych.raport.name.split("/")[-1]}"'
     )
 
     return response

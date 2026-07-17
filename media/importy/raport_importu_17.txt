@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: B³¹d
+Data: 2026-07-17 16:05:33.426862+00:00
+U¿ytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Za³¹czniki: 0
+
+WALIDACJA
+
+B£ÊDY:
+- Brak tytu³u skróconego. | arkusz: Rekordy | wiersz: 3 | pole: Tytu³ skrócony

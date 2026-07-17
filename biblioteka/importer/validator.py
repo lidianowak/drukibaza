@@ -22,6 +22,7 @@ class ImportValidator:
                 sheet="Rekordy",
                 row=row,
                 field="Tytuł skrócony",
+                import_id=record.get("id_importu"),
             )
             valid = False
 
@@ -37,6 +38,7 @@ class ImportValidator:
                 sheet="Egzemplarze",
                 row=row,
                 field="Biblioteka",
+                import_id=record.get("id_importu"),
             )
             valid = False
 
@@ -52,6 +54,7 @@ class ImportValidator:
                 sheet="Załączniki",
                 row=row,
                 field="Ścieżka pliku",
+                import_id=record.get("id_importu"),
             )
             valid = False
 
