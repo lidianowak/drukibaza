@@ -28,19 +28,23 @@
             padding: 40px 20px;
         }
 
-        .tekst-blok {
+        .wrapper {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            max-width: 600px;
-            width: 100%;
-            margin-bottom: 80px;
+            gap: 60px;
         }
 
         .logo {
-            max-width: 160px;
+            max-width: 500px;
             width: 30vw;
-            margin-bottom: 40px;
+        }
+
+        .tekst-grafika-blok {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 24px;
         }
 
         h1 {
@@ -51,31 +55,32 @@
             color: #4a4a4a;
             margin: 0;
             text-align: left;
+            white-space: nowrap;
         }
 
         .grafika {
-            max-width: 120px;
-            width: 80%;
+            max-width: 90px;
+            width: 30vw;
             height: auto;
+            flex-shrink: 0;
         }
 
         /* Tablety */
         @media (max-width: 768px) {
+            .wrapper {
+                gap: 40px;
+            }
+
             h1 {
                 font-size: 1.5rem;
             }
 
             .logo {
-                max-width: 130px;
-                margin-bottom: 30px;
-            }
-
-            .tekst-blok {
-                margin-bottom: 60px;
+                max-width: 100px;
             }
 
             .grafika {
-                max-width: 120px;
+                max-width: 90px;
             }
         }
 
@@ -85,17 +90,23 @@
                 padding: 24px 16px;
             }
 
-            h1 {
-                font-size: 1.2rem;
+            .wrapper {
+                gap: 30px;
             }
 
             .logo {
-                max-width: 100px;
-                margin-bottom: 20px;
+                max-width: 80px;
             }
 
-            .tekst-blok {
-                margin-bottom: 40px;
+            .tekst-grafika-blok {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+                white-space: normal;
             }
 
             .grafika {
@@ -106,15 +117,17 @@
 </head>
 <body>
 
-    <div class="tekst-blok">
+    <div class="wrapper">
         <!-- Logotyp -->
-        <img class="logo" src="{% static 'images/logotyp1.svg' %}" alt="Logo BiDO">
+        <img class="logo" src="{% static 'images/logotyp2.svg' %}" alt="Logo BiDO">
 
-        <h1>Strona w budowie. Zapraszam wkrótce!</h1>
+        <div class="tekst-grafika-blok">
+            <h1>Strona w budowie. Dostępna wkrótce!</h1>
+
+            <!-- Grafika łabędzia -->
+            <img class="grafika" src="{% static 'images/labedz w gniezdzie.svg' %}" alt="Ilustracja łabędzia w gnieździe">
+        </div>
     </div>
-
-    <!-- Grafika łabędzia -->
-    <img class="grafika" src="{% static 'images/labedz w gniezdzie.svg' %}" alt="Ilustracja łabędzia w gnieździe">
 
 </body>
 </html>
