@@ -1,13 +1,103 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
-    <title>Strona główna</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona w budowie</title>
+
+    <!-- Czcionka Bona Nova (styl italic) z Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            font-family: "Bona Nova", serif;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .logo {
+            max-width: 160px;
+            width: 30vw;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-family: "Bona Nova", serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 2rem;
+            color: #4a4a4a;
+            margin: 0 0 40px 0;
+            max-width: 600px;
+        }
+
+        .grafika {
+            max-width: 320px;
+            width: 80%;
+            height: auto;
+        }
+
+        /* Tablety */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 30px;
+            }
+
+            .logo {
+                max-width: 130px;
+            }
+
+            .grafika {
+                max-width: 260px;
+            }
+        }
+
+        /* Telefony */
+        @media (max-width: 480px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 24px;
+            }
+
+            .logo {
+                max-width: 100px;
+                margin-bottom: 16px;
+            }
+
+            .grafika {
+                max-width: 200px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Witaj na stronie Baza druków krakowskich!</h1>
-    <ul>
-        <li><a href="{% url 'baza' %}">Przejdź do bazy druków</a></li>
-        <li><a href="{% url 'info' %}">Informacje</a></li>
-    </ul>
+
+    <!-- Logotyp -->
+    <img class="logo" src="{% static 'images/logotyp1.svg' %}" alt="Logo BiDO">
+
+    <h1>Strona w budowie. Zapraszam wkrótce!</h1>
+
+    <!-- Grafika łabędzia -->
+    <img class="grafika" src="{% static 'images/labedz w gniezdzie.svg' %}" alt="Ilustracja łabędzia w gnieździe">
+
 </body>
 </html>
