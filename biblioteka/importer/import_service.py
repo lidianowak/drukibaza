@@ -25,6 +25,7 @@ from biblioteka.importer.result import (
     ImportErrorItem,
 )
 
+from .validator import ImportValidator
 
 def run_import(
     workbook,
@@ -35,6 +36,8 @@ def run_import(
     """
 
     result = ImportResult()
+
+    validator = ImportValidator(result)
 
     
     with transaction.atomic():
@@ -66,10 +69,12 @@ def run_import(
 
         rekordy = {}
         
-        for record in records:
+        for row, record in enumerate(records, start=2):
 
             mapped = map_record(record)
 
+            if not validator.validate_record(mapped, row):
+                continue
 
             rekord = create_record(
                 mapped,
@@ -77,6 +82,9 @@ def run_import(
             )
 
             rekordy[mapped["id_importu"]] = rekord
+
+        if result.errors:
+            raise ValueError("Import zawiera błędy walidacji.")
 
             
         print()
@@ -111,9 +119,12 @@ def run_import(
         print("IMPORT EGZEMPLARZY")
         print("=" * 60)
 
-        for specimen in specimens:
+        for row, specimen in enumerate(specimens, start=2):
 
             mapped = map_specimen(specimen)
+
+            if not validator.validate_specimen(mapped, row):
+                continue
 
             rekord = rekordy.get(
                 mapped["id_importu"]
@@ -139,9 +150,12 @@ def run_import(
         print("IMPORT ZAŁĄCZNIKÓW")
         print("=" * 60)
 
-        for attachment in attachments:
+        for row, attachment in enumerate(attachments, start=2):
 
             mapped = map_attachment(attachment)
+
+            if not validator.validate_attachment(mapped, row):
+                continue
 
             rekord = rekordy.get(
                 mapped["id_importu"]
@@ -151,16 +165,12 @@ def run_import(
 
                 result.success = False
 
-                result.errors.append(
-                    ImportErrorItem(
-                        message=(
-                            f"Nie znaleziono rekordu "
-                            f"{mapped['id_importu']}"
-                        ),
-                        sheet="Egzemplarze",
-                        field="Id importu",
-                    )
+                result.add_error(
+                    message=f"Nie znaleziono rekordu {mapped['id_importu']}",
+                    sheet="Załączniki",
+                    field="Id importu",
                 )
+                
 
                 raise ValueError(
                     f"Nie znaleziono rekordu dla {mapped['id_importu']}"

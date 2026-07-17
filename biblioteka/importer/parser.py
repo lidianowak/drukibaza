@@ -19,7 +19,14 @@ def parse_sheet(
     Nie interpretuje danych.
     """
 
+   
+
     headers = [cell.value for cell in worksheet[HEADER_ROW]]
+
+    if required_column not in headers:
+        raise ValueError(
+            f'Arkusz nie zawiera wymaganej kolumny "{required_column}".'
+        )
 
     records = []
 
@@ -30,10 +37,13 @@ def parse_sheet(
 
         record = dict(zip(headers, row))
 
-        # pomijamy niewypełnione wiersze formularza
-        if not record.get(required_column):
+        # pomijamy tylko całkowicie puste wiersze
+        if all(
+            value is None or str(value).strip() == ""
+            for value in row
+        ):
             continue
-
+        
         records.append(record)
 
 

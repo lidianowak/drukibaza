@@ -19,4 +19,26 @@ class ImportResult:
     attachments: int = 0
 
     errors: list[ImportErrorItem] = field(default_factory=list)
-    warnings: list = field(default_factory=list)
+    warnings: list[ImportErrorItem] = field(default_factory=list)
+
+def add_error(self, message, sheet=None, row=None, field=None):
+    self.errors.append(
+        ImportErrorItem(
+            message=message,
+            sheet=sheet,
+            row=row,
+            field=field,
+        )
+    )
+    self.success = False
+
+
+def add_warning(self, message, sheet=None, row=None, field=None):
+    self.warnings.append(
+        ImportErrorItem(
+            message=message,
+            sheet=sheet,
+            row=row,
+            field=field,
+        )
+    )
