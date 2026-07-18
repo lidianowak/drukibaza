@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    confirm_import,
     download_report,
     download_template,
     index,
@@ -30,5 +31,11 @@ urlpatterns = [
         "report/<int:pk>/download/",
         download_report,
         name="download-report",
+    ),
+
+    path(
+        "confirm/<int:pk>/",
+        confirm_import,
+        name="confirm-import",
     ),
 ]

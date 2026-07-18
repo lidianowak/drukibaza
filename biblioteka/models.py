@@ -1068,6 +1068,7 @@ class ImportDanych(models.Model):
 
     STATUSY = [
         ("w_trakcie", "W trakcie"),
+        ("gotowy", "Gotowy do importu"),
         ("zakonczony", "Zakończony"),
         ("blad", "Błąd"),
     ]

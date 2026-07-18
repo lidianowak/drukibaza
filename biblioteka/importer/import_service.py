@@ -162,6 +162,7 @@ def execute_import(
 def run_import(
     workbook,
     uzytkownik,
+    dry_run=False,
 ):
     """
     Wykonuje pełny import danych z formularza.
@@ -251,6 +252,9 @@ def run_import(
 
         if result.errors:
             raise ImportValidationError(result)
+        
+        if dry_run:
+            return result
         
         execute_import(
             mapped_records,

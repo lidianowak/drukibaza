@@ -7,8 +7,7 @@ Tworzy raport z walidacji i importu.
 
 from io import StringIO
 
-
-from io import StringIO
+from django.utils import timezone
 
 
 def build_report(import_danych, result=None):
@@ -24,8 +23,12 @@ def build_report(import_danych, result=None):
         f"Status: {import_danych.get_status_display()}\n"
     )
 
+    data = timezone.localtime(
+        import_danych.data_rozpoczecia
+    ).strftime("%d.%m.%Y %H:%M:%S")
+
     output.write(
-        f"Data: {import_danych.data_rozpoczecia}\n"
+        f"Data: {data}\n"
     )
 
     output.write(

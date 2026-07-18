@@ -7,14 +7,14 @@
 <h2>Pobierz formularz importu</h2>
 
 <p>
-    <p>
+    
     <a
         href="{% url 'download-template' %}"
         class="button"
     >
         Pobierz formularz XLSX
     </a>
-    </p>
+    
 </p>
 
 <hr>
@@ -50,7 +50,7 @@
 
 <p>
     <a
-        href="{% url 'import-report' ostatni_import %}"
+        href="{% url 'import-report' ostatni_import.pk %}"
         target="_blank"
         class="button"
     >
@@ -58,12 +58,112 @@
     </a>
 
     <a
-        href="{% url 'download-report' ostatni_import %}"
+        href="{% url 'download-report' ostatni_import.pk %}"
         class="button"
     >
         ⬇ Pobierz raport
     </a>
 </p>
+
+{% if ostatni_import.status == "blad" %}
+
+<div
+    style="
+        margin-top:20px;
+        padding:20px;
+        border:2px solid #ba2121;
+        border-radius:6px;
+        background:#fff4f4;
+    "
+>
+
+    <p style="margin-top:0;font-weight:bold;color:#ba2121;">
+        ❌ Analiza zakończyła się niepowodzeniem.
+    </p>
+
+    <p>
+        Import nie został wykonany z powodu krytycznych błędów walidacji.
+        Sprawdź raport, popraw arkusz i uruchom analizę ponownie.
+    </p>
+
+</div>
+
+{% endif %}
+
+{% if ostatni_import.status == "gotowy" %}
+
+<div
+    style="
+        margin-top:20px;
+        padding:20px;
+        border:2px solid #79aec8;
+        border-radius:6px;
+        background:#f4fbff;
+    "
+>
+
+    <p style="margin-top:0; font-weight:bold;">
+        ✅ Analiza zakończyła się pomyślnie.
+    </p>
+
+    <p>
+        Dane nie zostały jeszcze zapisane w bazie.
+        Aby zakończyć proces importu, sprawdź raport i kliknij przycisk poniżej.
+    </p>
+
+    <form
+        method="post"
+        action="{% url 'confirm-import' ostatni_import.pk %}"
+    >
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            class="default"
+            style="
+                font-size:18px;
+                padding:12px 28px;
+                font-weight:bold;
+            "
+        >
+            🚀 Potwierdź i zaimportuj dane
+        </button>
+
+    </form>
+
+</div>
+
+{% endif %}
+
+{% if ostatni_import.status == "zakonczony" %}
+
+<div
+    style="
+        margin-top:20px;
+        padding:20px;
+        border:2px solid #5cb85c;
+        border-radius:6px;
+        background:#f3fff3;
+    "
+>
+
+    <p style="margin-top:0;font-weight:bold;color:#2d7a2d;">
+        ✅ Import zakończył się pomyślnie.
+    </p>
+
+    <p>
+        Dane zostały zapisane do bazy.
+    </p>
+
+    <ul>
+        <li>Rekordy: {{ ostatni_import.liczba_rekordow }}</li>
+        <li>Egzemplarze: {{ ostatni_import.liczba_egzemplarzy }}</li>
+        <li>Załączniki: {{ ostatni_import.liczba_zalacznikow }}</li>
+    </ul>
+
+</div>
+
+{% endif %}
 
 {% endif %}
 

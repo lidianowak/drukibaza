@@ -35,6 +35,54 @@ from .exceptions import ImportValidationError
 
 from zipfile import BadZipFile
 
+from django.urls import reverse
+
+
+def finalize_import(
+    request,
+    import_danych,
+    result,
+    status,
+    message,
+):
+    """
+    Zapisuje wynik analizy lub importu.
+    """
+
+    import_danych.status = status
+
+    import_danych.liczba_rekordow = result.records
+    import_danych.liczba_egzemplarzy = result.specimens
+    import_danych.liczba_zalacznikow = result.attachments
+
+    import_danych.data_zakonczenia = timezone.now()
+
+    import_danych.czas_trwania = (
+        import_danych.data_zakonczenia
+        - import_danych.data_rozpoczecia
+    )
+
+    report = build_report(
+        import_danych,
+        result,
+    )
+
+    filename = f"raport_importu_{import_danych.pk}.txt"
+
+    import_danych.raport.save(
+        filename,
+        ContentFile(report.encode("utf-8")),
+        save=False,
+    )
+
+    import_danych.save()
+
+    request.session["ostatni_import"] = import_danych.pk
+
+    #messages.success(
+    #    request,
+    #    message,
+    #)
 
 @staff_member_required
 def index(request):
@@ -62,43 +110,18 @@ def index(request):
                 result = run_import(
                     workbook=workbook,
                     uzytkownik=request.user,
+                    dry_run=True,
                 )
 
-                import_danych.status = "zakonczony"
-
-                import_danych.liczba_rekordow = result.records
-                import_danych.liczba_egzemplarzy = result.specimens
-                import_danych.liczba_zalacznikow = result.attachments
-
-                import_danych.data_zakonczenia = timezone.now()
-
-                import_danych.czas_trwania = (
-                    import_danych.data_zakonczenia
-                    - import_danych.data_rozpoczecia
-                )
-
-                report = build_report(
-                    import_danych,
-                    result,
-                )
-
-                filename = (
-                    f"raport_importu_{import_danych.pk}.txt"
-                )
-
-                import_danych.raport.save(
-                    filename,
-                    ContentFile(report.encode("utf-8")),
-                    save=False,
-                )
-
-                import_danych.save()
-
-                request.session["ostatni_import"] = import_danych.pk
-
-                messages.success(
-                    request,
-                    "Import zakończył się pomyślnie.",
+                finalize_import(
+                    request=request,
+                    import_danych=import_danych,
+                    result=result,
+                    status="gotowy",
+                    message=(
+                        "Analiza zakończyła się pomyślnie. "
+                        "Możesz teraz rozpocząć import."
+                    ),
                 )
 
             except ImportValidationError as e:
@@ -133,10 +156,10 @@ def index(request):
 
                 request.session["ostatni_import"] = import_danych.pk
 
-                messages.error(
-                    request,
-                    str(e),
-                )
+                # messages.error(
+                #     request,
+                #     str(e),
+                # )
 
             except BadZipFile:
 
@@ -185,10 +208,17 @@ def index(request):
         .order_by("-data_rozpoczecia")[:30]
     )
 
-    ostatni_import = request.session.pop(
+    ostatni_import_id = request.session.pop(
         "ostatni_import",
         None,
     )
+
+    ostatni_import = None
+
+    if ostatni_import_id:
+        ostatni_import = ImportDanych.objects.get(
+            pk=ostatni_import_id
+        )
 
     if request.method != "POST":
         import_form = ImportForm()
@@ -203,6 +233,70 @@ def index(request):
             "ostatni_import": ostatni_import,
         },
     )
+
+@staff_member_required
+def confirm_import(request, pk):
+
+    if request.method != "POST":
+        return redirect("import-index")
+
+    import_danych = ImportDanych.objects.get(pk=pk)
+
+    try:
+
+        with import_danych.plik.open("rb") as f:
+            workbook = load_workbook(f)
+
+        result = run_import(
+            workbook=workbook,
+            uzytkownik=request.user,
+            dry_run=False,
+        )
+
+        finalize_import(
+            request=request,
+            import_danych=import_danych,
+            result=result,
+            status="zakonczony",
+            message="Import zakończył się pomyślnie.",
+        )
+
+    except ImportValidationError as e:
+
+        result = e.result
+
+        import_danych.status = "blad"
+
+        import_danych.data_zakonczenia = timezone.now()
+
+        import_danych.czas_trwania = (
+            import_danych.data_zakonczenia
+            - import_danych.data_rozpoczecia
+        )
+
+        report = build_report(
+            import_danych,
+            result,
+        )
+
+        filename = f"raport_importu_{import_danych.pk}.txt"
+
+        import_danych.raport.save(
+            filename,
+            ContentFile(report.encode("utf-8")),
+            save=False,
+        )
+
+        import_danych.save()
+
+        request.session["ostatni_import"] = import_danych.pk
+
+        messages.error(
+            request,
+            str(e),
+        )
+
+    return redirect("import-index")
 
 
 @staff_member_required
