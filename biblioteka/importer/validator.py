@@ -87,9 +87,10 @@ class ImportValidator:
     def validate_relations(
         self,
         record: dict,
-        rekordy: dict,
+        import_ids: set,
         row: int,
     ) -> bool:
+        
         """
         Sprawdza, czy wszystkie rekordy wskazane
         w wariantach i wznowieniach istnieją.
@@ -121,7 +122,7 @@ class ImportValidator:
                 # Rekord importowany w tym samym pliku
                 if value.startswith("R"):
 
-                    if value not in rekordy:
+                    if value not in import_ids:
 
                         self.result.add_error(
                             message=f"Nie znaleziono rekordu {value}.",

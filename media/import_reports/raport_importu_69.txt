@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-18 14:27:59.789727+00:00
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Brak biblioteki. | arkusz: Egzemplarze | id importu: R000001 | wiersz: 2 | pole: Biblioteka

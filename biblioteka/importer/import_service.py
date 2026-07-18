@@ -28,6 +28,76 @@ from biblioteka.importer.result import (
 from .validator import ImportValidator
 from .exceptions import ImportValidationError
 
+def validate_import(
+    records,
+    specimens,
+    attachments,
+    validator,
+    result,
+    import_ids,
+):
+    """
+    Wykonuje pełną walidację danych przed rozpoczęciem importu.
+    """
+
+    # ---------- Rekordy ----------
+
+    for row, record in enumerate(records, start=2):
+
+        mapped = map_record(record)
+
+        if not validator.validate_record(mapped, row):
+            continue
+
+        if not validator.validate_relations(
+            mapped,
+            import_ids,
+            row,
+        ):
+            continue
+
+    # ---------- Egzemplarze ----------
+
+    for row, specimen in enumerate(specimens, start=2):
+
+        mapped = map_specimen(specimen)
+
+        validator.validate_specimen(
+            mapped,
+            row,
+        )
+
+        if mapped["id_importu"] not in import_ids:
+
+            result.add_error(
+                message=f"Nie znaleziono rekordu {mapped['id_importu']}.",
+                sheet="Egzemplarze",
+                row=row,
+                field="Id importu",
+                import_id=mapped["id_importu"],
+            )
+
+    # ---------- Załączniki ----------
+
+    for row, attachment in enumerate(attachments, start=2):
+
+        mapped = map_attachment(attachment)
+
+        validator.validate_attachment(
+            mapped,
+            row,
+        )
+
+        if mapped["id_importu"] not in import_ids:
+
+            result.add_error(
+                message=f"Nie znaleziono rekordu {mapped['id_importu']}.",
+                sheet="Załączniki",
+                row=row,
+                field="Id importu",
+                import_id=mapped["id_importu"],
+            )
+
 def run_import(
     workbook,
     uzytkownik,
@@ -70,6 +140,11 @@ def run_import(
                 workbook["Rekordy"],
                 "Tytuł skrócony (transkrypcja)",
             )
+        
+        import_ids = {
+            map_record(record)["id_importu"]
+            for record in records
+        }
 
         specimens = parse_sheet(
                 workbook["Egzemplarze"],
@@ -89,6 +164,18 @@ def run_import(
         result.specimens = len(specimens)
         result.attachments = len(attachments)
 
+        validate_import(
+            records,
+            specimens,
+            attachments,
+            validator,
+            result,
+            import_ids,
+        )
+
+        if result.errors:
+            raise ImportValidationError(result)
+        
         rekordy = {}
         
         for row, record in enumerate(records, start=2):
@@ -120,7 +207,7 @@ def run_import(
 
             if not validator.validate_relations(
                 mapped,
-                rekordy,
+                import_ids,
                 row,
             ):
                 raise ImportValidationError(result)

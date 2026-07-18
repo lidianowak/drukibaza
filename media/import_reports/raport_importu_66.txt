@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-18 13:58:10.258363+00:00
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Nie znaleziono rekordu 00001. | arkusz: Rekordy | id importu: R000001 | wiersz: 2 | pole: Wznowienia
