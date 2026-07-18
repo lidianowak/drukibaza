@@ -29,22 +29,22 @@ from .validator import ImportValidator
 from .exceptions import ImportValidationError
 
 def validate_import(
-    records,
-    specimens,
-    attachments,
+    mapped_records,
+    mapped_specimens,
+    mapped_attachments,
     validator,
     result,
     import_ids,
 ):
+    
     """
     Wykonuje pełną walidację danych przed rozpoczęciem importu.
     """
 
     # ---------- Rekordy ----------
 
-    for row, record in enumerate(records, start=2):
+    for row, mapped in enumerate(mapped_records, start=2):
 
-        mapped = map_record(record)
 
         if not validator.validate_record(mapped, row):
             continue
@@ -58,10 +58,9 @@ def validate_import(
 
     # ---------- Egzemplarze ----------
 
-    for row, specimen in enumerate(specimens, start=2):
+    for row, mapped in enumerate(mapped_specimens, start=2):
 
-        mapped = map_specimen(specimen)
-
+        
         validator.validate_specimen(
             mapped,
             row,
@@ -79,10 +78,9 @@ def validate_import(
 
     # ---------- Załączniki ----------
 
-    for row, attachment in enumerate(attachments, start=2):
+    for row, mapped in enumerate(mapped_attachments, start=2):
 
-        mapped = map_attachment(attachment)
-
+        
         validator.validate_attachment(
             mapped,
             row,
@@ -97,6 +95,69 @@ def validate_import(
                 field="Id importu",
                 import_id=mapped["id_importu"],
             )
+
+def execute_import(
+    mapped_records,
+    mapped_specimens,
+    mapped_attachments,
+    uzytkownik,
+):
+    """
+    Tworzy obiekty w bazie po pomyślnej walidacji.
+    """
+
+    rekordy = {}
+
+    # ---------- Rekordy ----------
+
+    for mapped in mapped_records:
+
+        rekord = create_record(
+            mapped,
+            uzytkownik,
+        )
+
+        rekordy[mapped["id_importu"]] = rekord
+
+    # ---------- Relacje ----------
+
+    for mapped in mapped_records:
+
+        relacje = map_relations(mapped)
+
+        rekord = rekordy[mapped["id_importu"]]
+
+        create_relations(
+            rekord,
+            relacje,
+            rekordy,
+        )
+
+    # ---------- Egzemplarze ----------
+
+    for mapped in mapped_specimens:
+
+        rekord = rekordy[mapped["id_importu"]]
+
+        create_specimen(
+            rekord,
+            mapped,
+        )
+
+    # ---------- Załączniki ----------
+
+    for mapped in mapped_attachments:
+
+        rekord = rekordy[mapped["id_importu"]]
+
+        create_attachment(
+            rekord,
+            mapped,
+        )
+
+    return rekordy
+
+
 
 def run_import(
     workbook,
@@ -141,20 +202,35 @@ def run_import(
                 "Tytuł skrócony (transkrypcja)",
             )
         
-        import_ids = {
-            map_record(record)["id_importu"]
+        mapped_records = [
+            map_record(record)
             for record in records
+        ]
+        
+        import_ids = {
+            record["id_importu"]
+            for record in mapped_records
         }
 
         specimens = parse_sheet(
                 workbook["Egzemplarze"],
                 "Biblioteka",
             )
+        
+        mapped_specimens = [
+            map_specimen(specimen)
+            for specimen in specimens
+        ]
 
         attachments = parse_sheet(
                 workbook["Załączniki"],
                 "Ścieżka pliku",
             )
+        
+        mapped_attachments = [
+            map_attachment(attachment)
+            for attachment in attachments
+        ]
 
         print(f"Liczba rekordów: {len(records)}")
         print(f"Liczba egzemplarzy: {len(specimens)}")
@@ -165,9 +241,9 @@ def run_import(
         result.attachments = len(attachments)
 
         validate_import(
-            records,
-            specimens,
-            attachments,
+            mapped_records,
+            mapped_specimens,
+            mapped_attachments,
             validator,
             result,
             import_ids,
