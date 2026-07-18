@@ -1,4 +1,5 @@
 from .result import ImportResult
+from biblioteka.models import Rekord
 
 
 class ImportValidator:
@@ -67,5 +68,85 @@ class ImportValidator:
                 import_id=attachment.get("id_importu"),
             )
             valid = False
+
+        if (
+            attachment.get("sekcja") == "marginalia"
+            and not attachment.get("sygnatura")
+        ):
+            self.result.add_error(
+                message="Załącznik w sekcji „marginalia” wymaga wskazania sygnatury egzemplarza.",
+                sheet="Załączniki",
+                row=row,
+                field="Sygnatura egzemplarza",
+                import_id=attachment.get("id_importu"),
+            )
+            valid = False
+
+        return valid
+    
+    def validate_relations(
+        self,
+        record: dict,
+        rekordy: dict,
+        row: int,
+    ) -> bool:
+        """
+        Sprawdza, czy wszystkie rekordy wskazane
+        w wariantach i wznowieniach istnieją.
+        """
+
+        valid = True
+
+        for field, label in (
+            ("warianty", "Warianty"),
+            ("wznowienia", "Wznowienia"),
+        ):
+
+            values = record.get(field)
+
+            if not values:
+                continue
+
+            for value in values.split(";"):
+
+                value = value.strip()
+
+                if not value:
+                    continue
+
+                # Opis bibliograficzny pomijamy
+                if value.startswith("{") and value.endswith("}"):
+                    continue
+
+                # Rekord importowany w tym samym pliku
+                if value.startswith("R"):
+
+                    if value not in rekordy:
+
+                        self.result.add_error(
+                            message=f"Nie znaleziono rekordu {value}.",
+                            sheet="Rekordy",
+                            row=row,
+                            field=label,
+                            import_id=record.get("id_importu"),
+                        )
+
+                        valid = False
+
+                else:
+
+                    if not Rekord.objects.filter(
+                        identyfikator=value
+                    ).exists():
+
+                        self.result.add_error(
+                            message=f"Nie znaleziono rekordu {value}.",
+                            sheet="Rekordy",
+                            row=row,
+                            field=label,
+                            import_id=record.get("id_importu"),
+                        )
+
+                        valid = False
 
         return valid

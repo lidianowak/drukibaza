@@ -40,6 +40,27 @@ def run_import(
 
     validator = ImportValidator(result)
 
+    REQUIRED_SHEETS = [
+        "Rekordy",
+        "Egzemplarze",
+        "Załączniki",
+    ]
+
+    missing = [
+        sheet
+        for sheet in REQUIRED_SHEETS
+        if sheet not in workbook.sheetnames
+    ]
+
+    if missing:
+
+        result.add_error(
+            message=f"Brakuje wymaganych arkuszy: {', '.join(missing)}.",
+            sheet="Plik",
+        )
+
+        raise ImportValidationError(result)
+
     
     with transaction.atomic():
 
@@ -93,17 +114,18 @@ def run_import(
         print("IMPORT RELACJI")
         print("=" * 60)
 
-        for record in records:
+        for row, record in enumerate(records, start=2):
 
             mapped = map_record(record)
 
-            print("MAPPED:")
-            print(mapped)
+            if not validator.validate_relations(
+                mapped,
+                rekordy,
+                row,
+            ):
+                raise ImportValidationError(result)
 
             relacje = map_relations(mapped)
-
-            print("RELACJE:")
-            print(relacje)
 
             rekord = rekordy[mapped["id_importu"]]
 

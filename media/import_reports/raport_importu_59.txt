@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-18 01:32:45.957205+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Nie znaleziono rekordu R000007. | arkusz: Rekordy | id importu: R000001 | wiersz: 2 | pole: Wznowienia

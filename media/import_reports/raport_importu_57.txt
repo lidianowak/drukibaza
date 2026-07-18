@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-18 01:06:19.694749+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Załącznik w sekcji „marginalia” wymaga wskazania sygnatury egzemplarza. | arkusz: Załączniki | id importu: R000001 | wiersz: 2 | pole: Sygnatura egzemplarza

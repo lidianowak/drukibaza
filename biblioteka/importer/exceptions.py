@@ -18,5 +18,5 @@ class ImportValidationError(Exception):
         self.result = result
 
         super().__init__(
-            "Import zawiera błędy walidacji."
+            "Import nie powiódł się z powodu krytycznych błędów walidacji! Sprawdź raport, popraw arkusz i załaduj go ponownie."
         )
