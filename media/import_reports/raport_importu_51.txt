@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-17 23:54:33.025398+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Nie znaleziono rekordu r000008. | arkusz: Załączniki | id importu: r000008 | wiersz: 2 | pole: Id importu

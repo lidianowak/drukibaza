@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-17 23:14:23.823712+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Brak ścieżki pliku. | arkusz: Załączniki | id importu: R000001 | wiersz: 2 | pole: Ścieżka pliku

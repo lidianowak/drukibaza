@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-17 20:53:11.670685+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Brak tytułu skróconego. | arkusz: Rekordy | id importu: R000002 | wiersz: 3 | pole: Tytuł skrócony

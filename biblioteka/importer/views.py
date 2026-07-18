@@ -64,7 +64,42 @@ def index(request):
                     uzytkownik=request.user,
                 )
 
-                ...
+                import_danych.status = "zakonczony"
+
+                import_danych.liczba_rekordow = result.records
+                import_danych.liczba_egzemplarzy = result.specimens
+                import_danych.liczba_zalacznikow = result.attachments
+
+                import_danych.data_zakonczenia = timezone.now()
+
+                import_danych.czas_trwania = (
+                    import_danych.data_zakonczenia
+                    - import_danych.data_rozpoczecia
+                )
+
+                report = build_report(
+                    import_danych,
+                    result,
+                )
+
+                filename = (
+                    f"raport_importu_{import_danych.pk}.txt"
+                )
+
+                import_danych.raport.save(
+                    filename,
+                    ContentFile(report.encode("utf-8")),
+                    save=False,
+                )
+
+                import_danych.save()
+
+                request.session["ostatni_import"] = import_danych.pk
+
+                messages.success(
+                    request,
+                    "Import zakończył się pomyślnie.",
+                )
 
             except ImportValidationError as e:
 

@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-18 00:01:09.227874+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Nie wybrano sekcji załącznika. | arkusz: Załączniki | id importu: R000006 | wiersz: 2 | pole: Sekcja

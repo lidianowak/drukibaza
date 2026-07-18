@@ -38,7 +38,7 @@ class ImportValidator:
                 sheet="Egzemplarze",
                 row=row,
                 field="Biblioteka",
-                import_id=record.get("id_importu"),
+                import_id=specimen.get("id_importu"),
             )
             valid = False
 
@@ -54,7 +54,17 @@ class ImportValidator:
                 sheet="Załączniki",
                 row=row,
                 field="Ścieżka pliku",
-                import_id=record.get("id_importu"),
+                import_id=attachment.get("id_importu"),
+            )
+            valid = False
+
+        if not attachment.get("sekcja"):
+            self.result.add_error(
+                message="Nie wybrano sekcji załącznika.",
+                sheet="Załączniki",
+                row=row,
+                field="Sekcja",
+                import_id=attachment.get("id_importu"),
             )
             valid = False
 

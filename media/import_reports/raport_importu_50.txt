@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 2026-07-17 23:52:50.507808+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Nie znaleziono rekordu R000005. | arkusz: Egzemplarze | id importu: R000005 | wiersz: 3 | pole: Id importu

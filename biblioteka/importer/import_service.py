@@ -125,16 +125,23 @@ def run_import(
             mapped = map_specimen(specimen)
 
             if not validator.validate_specimen(mapped, row):
-                continue
+                raise ImportValidationError(result)
 
             rekord = rekordy.get(
                 mapped["id_importu"]
             )
 
             if rekord is None:
-                raise ValueError(
-                    f"Nie znaleziono rekordu dla {mapped['id_importu']}"
+
+                result.add_error(
+                    message=f"Nie znaleziono rekordu {mapped['id_importu']}.",
+                    sheet="Egzemplarze",
+                    row=row,
+                    field="Id importu",
+                    import_id=mapped["id_importu"],
                 )
+
+                raise ImportValidationError(result)
 
             create_specimen(
                 rekord,
@@ -156,7 +163,7 @@ def run_import(
             mapped = map_attachment(attachment)
 
             if not validator.validate_attachment(mapped, row):
-                continue
+                raise ImportValidationError(result)
 
             rekord = rekordy.get(
                 mapped["id_importu"]
@@ -164,18 +171,15 @@ def run_import(
 
             if rekord is None:
 
-                result.success = False
-
                 result.add_error(
-                    message=f"Nie znaleziono rekordu {mapped['id_importu']}",
+                    message=f"Nie znaleziono rekordu {mapped['id_importu']}.",
                     sheet="Załączniki",
+                    row=row,
                     field="Id importu",
+                    import_id=mapped["id_importu"],
                 )
-                
 
-                raise ValueError(
-                    f"Nie znaleziono rekordu dla {mapped['id_importu']}"
-                )
+                raise ImportValidationError(result)
 
             create_attachment(
                 rekord,

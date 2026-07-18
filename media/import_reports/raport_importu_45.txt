@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Zakończony
+Data: 2026-07-17 23:02:46.182988+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 2
+Egzemplarze: 2
+Załączniki: 1
+
+WALIDACJA
+
+BŁĘDY:
+- Brak ścieżki pliku. | arkusz: Załączniki | id importu: R000001 | wiersz: 2 | pole: Ścieżka pliku

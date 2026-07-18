@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Zakończony
+Data: 2026-07-17 23:01:11.993311+00:00
+Użytkownik: liduszek
+
+ZAIMPORTOWANO
+Rekordy: 2
+Egzemplarze: 2
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Brak biblioteki. | arkusz: Egzemplarze | id importu: R000002 | wiersz: 3 | pole: Biblioteka
