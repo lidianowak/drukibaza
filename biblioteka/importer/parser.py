@@ -8,6 +8,20 @@ HEADER_ROW = 14
 EXAMPLE_ROW = 15
 DATA_START_ROW = 16
 
+def normalize_import_id(value):
+    """
+    Normalizuje identyfikator importu.
+
+    R000001
+    r000001
+    R000001
+    → R000001
+    """
+    if value is None:
+        return None
+
+    return str(value).strip().upper()
+
 def parse_sheet(
     worksheet,
     required_column,
@@ -36,6 +50,10 @@ def parse_sheet(
     ):
 
         record = dict(zip(headers, row))
+
+        # normalizacja identyfikatora importu
+        if "ID importu" in record:
+            record["ID importu"] = normalize_import_id(record["ID importu"])
 
         # pomijamy tylko całkowicie puste wiersze
         if all(

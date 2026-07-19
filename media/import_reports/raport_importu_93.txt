@@ -1,0 +1,16 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 19.07.2026 16:21:25
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Nie wybrano sekcji załącznika. | arkusz: Załączniki | id importu: r000001 | wiersz: 2 | pole: Sekcja
+- Nie znaleziono rekordu r000001. | arkusz: Załączniki | id importu: r000001 | wiersz: 2 | pole: Id importu
