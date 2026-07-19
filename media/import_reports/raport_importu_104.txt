@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 19.07.2026 19:06:56
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Kolumna 7: oczekiwano 'Drukarz', otrzymano 'Drukarzz'. | arkusz: Rekordy

@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 19.07.2026 19:02:04
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Struktura arkusza 'Rekordy' jest niezgodna z formularzem wzorcowym. | arkusz: Rekordy

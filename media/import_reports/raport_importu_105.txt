@@ -1,0 +1,42 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 19.07.2026 19:07:27
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY:
+- Kolumna 7: oczekiwano 'Drukarz', otrzymano 'Język'. | arkusz: Rekordy
+- Kolumna 8: oczekiwano 'Język', otrzymano 'Format'. | arkusz: Rekordy
+- Kolumna 9: oczekiwano 'Format', otrzymano 'Liczba arkuszy'. | arkusz: Rekordy
+- Kolumna 10: oczekiwano 'Liczba arkuszy', otrzymano 'Liczba kart'. | arkusz: Rekordy
+- Kolumna 11: oczekiwano 'Liczba kart', otrzymano 'Kolacjonowanie'. | arkusz: Rekordy
+- Kolumna 12: oczekiwano 'Kolacjonowanie', otrzymano 'Czcionki'. | arkusz: Rekordy
+- Kolumna 13: oczekiwano 'Czcionki', otrzymano 'Ozdobniki'. | arkusz: Rekordy
+- Kolumna 14: oczekiwano 'Ozdobniki', otrzymano 'Ryciny'. | arkusz: Rekordy
+- Kolumna 15: oczekiwano 'Ryciny', otrzymano 'Uwagi (opis fizyczny)'. | arkusz: Rekordy
+- Kolumna 16: oczekiwano 'Uwagi (opis fizyczny)', otrzymano 'Adresat dedykacji'. | arkusz: Rekordy
+- Kolumna 17: oczekiwano 'Adresat dedykacji', otrzymano 'Powiązane osoby'. | arkusz: Rekordy
+- Kolumna 18: oczekiwano 'Powiązane osoby', otrzymano 'Powiązane instytucje'. | arkusz: Rekordy
+- Kolumna 19: oczekiwano 'Powiązane instytucje', otrzymano 'Powiązane miejsca'. | arkusz: Rekordy
+- Kolumna 20: oczekiwano 'Powiązane miejsca', otrzymano 'Tematy'. | arkusz: Rekordy
+- Kolumna 21: oczekiwano 'Tematy', otrzymano 'Gatunki'. | arkusz: Rekordy
+- Kolumna 22: oczekiwano 'Gatunki', otrzymano 'Motywy'. | arkusz: Rekordy
+- Kolumna 23: oczekiwano 'Motywy', otrzymano 'Wydarzenia'. | arkusz: Rekordy
+- Kolumna 24: oczekiwano 'Wydarzenia', otrzymano 'Bibliografie'. | arkusz: Rekordy
+- Kolumna 25: oczekiwano 'Bibliografie', otrzymano 'Literatura przedmiotu'. | arkusz: Rekordy
+- Kolumna 26: oczekiwano 'Literatura przedmiotu', otrzymano 'Linki do digitalizacji'. | arkusz: Rekordy
+- Kolumna 27: oczekiwano 'Linki do digitalizacji', otrzymano 'Warianty'. | arkusz: Rekordy
+- Kolumna 28: oczekiwano 'Warianty', otrzymano 'Wznowione / wznowienia'. | arkusz: Rekordy
+- Kolumna 29: oczekiwano 'Wznowione / wznowienia', otrzymano 'Pozostałe druki powiązane'. | arkusz: Rekordy
+- Kolumna 30: oczekiwano 'Pozostałe druki powiązane', otrzymano 'Tagi'. | arkusz: Rekordy
+- Kolumna 31: oczekiwano 'Tagi', otrzymano 'Status opracowania'. | arkusz: Rekordy
+- Kolumna 32: oczekiwano 'Status opracowania', otrzymano 'Uwagi z importu'. | arkusz: Rekordy
+- Kolumna 33: oczekiwano 'Uwagi z importu', otrzymano 'Miniatura karty tytułowej (ścieżka)'. | arkusz: Rekordy
+- Brakuje kolumny 'Miniatura karty tytułowej (ścieżka)' (kolumna 34). | arkusz: Rekordy

@@ -28,6 +28,12 @@ from biblioteka.importer.result import (
 from .validator import ImportValidator
 from .exceptions import ImportValidationError
 
+from biblioteka.importer.template_validator import (
+    validate_template_structure,
+)
+
+from collections import Counter
+
 def validate_import(
     mapped_records,
     mapped_specimens,
@@ -172,6 +178,14 @@ def run_import(
 
     validator = ImportValidator(result)
 
+    validate_template_structure(
+        workbook,
+        result,
+    )
+
+    if result.errors:
+        raise ImportValidationError(result)
+
     REQUIRED_SHEETS = [
         "Rekordy",
         "Egzemplarze",
@@ -208,10 +222,33 @@ def run_import(
             for record in records
         ]
         
-        import_ids = {
-            record["id_importu"]
-            for record in mapped_records
-        }
+        id_rows = {}
+
+        for row, record in enumerate(mapped_records, start=2):
+
+            import_id = record["id_importu"]
+
+            id_rows.setdefault(
+                import_id,
+                [],
+            ).append(row)
+
+        for import_id, rows in id_rows.items():
+
+            if len(rows) > 1:
+
+                result.add_error(
+                    message=(
+                        f"Id importu '{import_id}' "
+                        f"występuje wielokrotnie "
+                        f"(wiersze: {', '.join(map(str, rows))})."
+                    ),
+                    sheet="Rekordy",
+                    field="Id importu",
+                    import_id=import_id,
+                )
+
+        import_ids = set(id_rows.keys())
 
         specimens = parse_sheet(
                 workbook["Egzemplarze"],

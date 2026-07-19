@@ -56,7 +56,7 @@ def build_report(import_danych, result=None):
 
         if result.errors:
 
-            output.write("\nBŁĘDY:\n")
+            output.write("\nBŁĘDY KRYTYCZNE:\n")
 
             for error in result.errors:
 

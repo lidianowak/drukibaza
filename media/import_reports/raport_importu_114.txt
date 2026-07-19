@@ -1,0 +1,16 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 19.07.2026 20:00:36
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY KRYTYCZNE:
+- Niepoprawny adres URL: https://lubimyczytac | arkusz: Rekordy | id importu: R000001 | wiersz: 2 | pole: Linki do digitalizacji
+- Niepoprawny adres URL: lorem ipsum | arkusz: Egzemplarze | id importu: R000001 | wiersz: 2 | pole: Link do katalogu

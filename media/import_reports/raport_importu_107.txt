@@ -1,0 +1,15 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 19.07.2026 19:21:33
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY KRYTYCZNE:
+- Id importu 'R000001' występuje wielokrotnie (wiersze: 2, 4). | arkusz: Rekordy | id importu: R000001 | pole: Id importu
