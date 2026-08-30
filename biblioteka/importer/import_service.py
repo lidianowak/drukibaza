@@ -6,6 +6,7 @@ Główna logika importu danych.
 
 from biblioteka.importer.parser import parse_sheet
 from biblioteka.importer.mapper import map_record
+from biblioteka.importer.object_parser import parse_persons
 
 from biblioteka.importer.record_builder import create_record
 
@@ -34,6 +35,92 @@ from biblioteka.importer.template_validator import (
 
 from collections import Counter
 
+
+def check_duplicate_records(mapped_records, result):
+    """
+    Sprawdza, czy wśród rekordów przeznaczonych do importu
+    znajdują się rekordy o takim samym autorze, drukarzu
+    i roku wydania.
+    """
+
+    keys = {}
+
+    for mapped in mapped_records:
+
+        row = mapped["_excel_row"]
+
+        authors = parse_persons(
+            mapped.get("autorzy") or ""
+        )
+
+        printers = parse_persons(
+            mapped.get("drukarze") or ""
+        )
+
+        if not authors or not printers or not mapped.get("rok_wydania"):
+            continue
+
+        def person_key(person):
+
+            if person.nazwa:
+                return (
+                    "nazwa",
+                    person.nazwa,
+                    person.kwalifikator or "",
+                )
+
+            return (
+                "osoba",
+                person.nazwisko or "",
+                person.imiona or "",
+                person.kwalifikator or "",
+            )
+
+        author_key = tuple(
+            sorted(
+                person_key(person)
+                for person in authors
+            )
+        )
+
+        printer_key = tuple(
+            sorted(
+                person_key(person)
+                for person in printers
+            )
+        )
+
+        year = mapped.get("rok_wydania")
+
+        key = (
+            author_key,
+            printer_key,
+            year,
+        )
+
+        keys.setdefault(
+            key,
+            [],
+        ).append(row)
+
+    for key, rows in keys.items():
+
+        if len(rows) > 1:
+
+            for row in rows:
+
+                result.add_warning(
+                    message=(
+                        "Możliwy duplikat rekordu: "
+                        "inny rekord w pliku ma tego samego "
+                        "autora, drukarza i rok wydania."
+                    ),
+                    sheet="Rekordy",
+                    row=row,
+                    field="Autor(y), Drukarz, Rok wydania",
+                )
+
+
 def validate_import(
     mapped_records,
     mapped_specimens,
@@ -51,7 +138,6 @@ def validate_import(
 
     for row, mapped in enumerate(mapped_records, start=2):
 
-
         if not validator.validate_record(mapped, row):
             continue
 
@@ -66,7 +152,6 @@ def validate_import(
 
     for row, mapped in enumerate(mapped_specimens, start=2):
 
-        
         validator.validate_specimen(
             mapped,
             row,
@@ -86,7 +171,6 @@ def validate_import(
 
     for row, mapped in enumerate(mapped_attachments, start=2):
 
-        
         validator.validate_attachment(
             mapped,
             row,
@@ -101,6 +185,7 @@ def validate_import(
                 field="Id importu",
                 import_id=mapped["id_importu"],
             )
+
 
 def execute_import(
     mapped_records,
@@ -164,7 +249,6 @@ def execute_import(
     return rekordy
 
 
-
 def run_import(
     workbook,
     uzytkownik,
@@ -207,21 +291,23 @@ def run_import(
 
         raise ImportValidationError(result)
 
-    
     with transaction.atomic():
 
-            
-
         records = parse_sheet(
-                workbook["Rekordy"],
-                "Tytuł skrócony (transkrypcja)",
-            )
-        
+            workbook["Rekordy"],
+            "Tytuł skrócony (transkrypcja)",
+        )
+
         mapped_records = [
             map_record(record)
             for record in records
         ]
-        
+
+        check_duplicate_records(
+            mapped_records,
+            result,
+        )
+
         id_rows = {}
 
         for row, record in enumerate(mapped_records, start=2):
@@ -251,20 +337,20 @@ def run_import(
         import_ids = set(id_rows.keys())
 
         specimens = parse_sheet(
-                workbook["Egzemplarze"],
-                "Biblioteka",
-            )
-        
+            workbook["Egzemplarze"],
+            "Biblioteka",
+        )
+
         mapped_specimens = [
             map_specimen(specimen)
             for specimen in specimens
         ]
 
         attachments = parse_sheet(
-                workbook["Załączniki"],
-                "Ścieżka pliku",
-            )
-        
+            workbook["Załączniki"],
+            "Ścieżka pliku",
+        )
+
         mapped_attachments = [
             map_attachment(attachment)
             for attachment in attachments
@@ -289,10 +375,10 @@ def run_import(
 
         if result.errors:
             raise ImportValidationError(result)
-        
+
         if dry_run:
             return result
-        
+
         execute_import(
             mapped_records,
             mapped_specimens,

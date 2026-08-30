@@ -44,12 +44,17 @@ def parse_sheet(
 
     records = []
 
-    for row in worksheet.iter_rows(
-        min_row=DATA_START_ROW,
-        values_only=True,
+    for row_number, row in enumerate(
+        worksheet.iter_rows(
+            min_row=DATA_START_ROW,
+            values_only=True,
+        ),
+        start=DATA_START_ROW,
     ):
 
         record = dict(zip(headers, row))
+
+        record["_excel_row"] = row_number
 
         # normalizacja identyfikatora importu
         if "ID importu" in record:

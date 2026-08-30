@@ -62,6 +62,10 @@ def map_record(record):
 
     for excel_name, value in record.items():
 
+        if excel_name == "_excel_row":
+            mapped["_excel_row"] = value
+            continue
+
         internal_name = REKORD_MAP.get(excel_name)
 
         if internal_name:

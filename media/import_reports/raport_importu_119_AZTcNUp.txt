@@ -1,0 +1,18 @@
+RAPORT IMPORTU
+
+Status: Zakończony
+Data: 31.08.2026 00:53:19
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 7
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+OSTRZEŻENIA:
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 17 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 21 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 22 | pole: Autor(y), Drukarz, Rok wydania
