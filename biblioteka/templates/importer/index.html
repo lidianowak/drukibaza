@@ -161,6 +161,15 @@
         <li>Załączniki: {{ ostatni_import.liczba_zalacznikow }}</li>
     </ul>
 
+    {% if ostatni_import.statystyki_obiektow %}
+        <h4>Nowe obiekty</h4>
+        <ul>
+            {% for object_type, count in ostatni_import.statystyki_obiektow.items %}
+                <li>{{ object_type }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
 </div>
 
 {% endif %}

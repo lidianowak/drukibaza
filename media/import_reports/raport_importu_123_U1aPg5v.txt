@@ -1,0 +1,40 @@
+RAPORT IMPORTU
+
+Status: Zakończony
+Data: 01.09.2026 17:05:52
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 11
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+OSTRZEŻENIA:
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 17 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 21 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: inny rekord w pliku ma tego samego autora, drukarza i rok wydania. | arkusz: Rekordy | wiersz: 22 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 17 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 17 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 17 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 17 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 18 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 18 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 19 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 19 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 20 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 20 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 21 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 21 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 21 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 21 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 22 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 22 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 22 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 22 | pole: Autor(y), Drukarz, Rok wydania

@@ -19,6 +19,13 @@ from biblioteka.importer.attachment_builder import create_attachment
 from biblioteka.importer.relation_mapper import map_relations
 from biblioteka.importer.relation_builder import create_relations
 
+from biblioteka.models import (
+    Rekord,
+    RelacjaOsoby,
+)
+
+from biblioteka.importer.builder import find_person
+
 from django.db import transaction
 
 from biblioteka.importer.result import (
@@ -121,6 +128,125 @@ def check_duplicate_records(mapped_records, result):
                 )
 
 
+def check_existing_duplicate_records(mapped_records, result):
+    """
+    Sprawdza, czy w bazie istnieją już rekordy o takim samym
+    autorze, drukarzu i roku wydania jak rekordy przeznaczone
+    do importu.
+    """
+
+    for mapped in mapped_records:
+
+        row = mapped["_excel_row"]
+
+        authors = parse_persons(
+            mapped.get("autorzy") or ""
+        )
+
+        printers = parse_persons(
+            mapped.get("drukarze") or ""
+        )
+
+        year = mapped.get("rok_wydania")
+
+        if not authors or not printers or not year:
+            continue
+
+        # ---------- Autorzy ----------
+
+        author_objects = []
+
+        for person in authors:
+
+            matches = find_person(person)
+
+            if matches.count() != 1:
+                author_objects = []
+                break
+
+            author_objects.append(
+                matches.first()
+            )
+
+        if not author_objects:
+            continue
+
+        # ---------- Drukarze ----------
+
+        printer_objects = []
+
+        for person in printers:
+
+            matches = find_person(person)
+
+            if matches.count() != 1:
+                printer_objects = []
+                break
+
+            printer_objects.append(
+                matches.first()
+            )
+
+        if not printer_objects:
+            continue
+
+        imported_author_ids = {
+            osoba.pk
+            for osoba in author_objects
+        }
+
+        imported_printer_ids = {
+            osoba.pk
+            for osoba in printer_objects
+        }
+
+        # ---------- Istniejące rekordy ----------
+
+        existing_records = Rekord.objects.filter(
+            rok_wydania=year,
+        )
+
+        for existing in existing_records:
+
+            existing_author_ids = set(
+                RelacjaOsoby.objects.filter(
+                    rekord=existing,
+                    typ="autor",
+                ).values_list(
+                    "osoba_id",
+                    flat=True,
+                )
+            )
+
+            existing_printer_ids = set(
+                RelacjaOsoby.objects.filter(
+                    rekord=existing,
+                    typ="drukarz",
+                ).values_list(
+                    "osoba_id",
+                    flat=True,
+                )
+            )
+
+            if (
+                existing_author_ids == imported_author_ids
+                and
+                existing_printer_ids == imported_printer_ids
+            ):
+
+                result.add_warning(
+                    message=(
+                        "Możliwy duplikat rekordu: "
+                        "w bazie istnieje już rekord "
+                        "o tym samym autorze, drukarzu "
+                        "i roku wydania."
+                    ),
+                    sheet="Rekordy",
+                    row=row,
+                    field="Autor(y), Drukarz, Rok wydania",
+                )
+
+
 def validate_import(
     mapped_records,
     mapped_specimens,
@@ -136,7 +262,9 @@ def validate_import(
 
     # ---------- Rekordy ----------
 
-    for row, mapped in enumerate(mapped_records, start=2):
+    for mapped in mapped_records:
+
+        row = mapped["_excel_row"]
 
         if not validator.validate_record(mapped, row):
             continue
@@ -192,7 +320,9 @@ def execute_import(
     mapped_specimens,
     mapped_attachments,
     uzytkownik,
+    result=None,
 ):
+    
     """
     Tworzy obiekty w bazie po pomyślnej walidacji.
     """
@@ -206,6 +336,7 @@ def execute_import(
         rekord = create_record(
             mapped,
             uzytkownik,
+            result=result,
         )
 
         rekordy[mapped["id_importu"]] = rekord
@@ -308,9 +439,16 @@ def run_import(
             result,
         )
 
+        check_existing_duplicate_records(
+            mapped_records,
+            result,
+        )
+
         id_rows = {}
 
-        for row, record in enumerate(mapped_records, start=2):
+        for record in mapped_records:
+
+            row = record["_excel_row"]
 
             import_id = record["id_importu"]
 
@@ -384,6 +522,7 @@ def run_import(
             mapped_specimens,
             mapped_attachments,
             uzytkownik,
+            result=result,
         )
 
         return result

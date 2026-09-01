@@ -32,6 +32,7 @@ from biblioteka.importer.object_parser import (
     ParsedName,
 )
 
+
 def find_person(person: ParsedPerson):
     """
     Szuka osoby najpierw po nazwie głównej,
@@ -65,7 +66,12 @@ def find_person(person: ParsedPerson):
         warianty_nazw__nazwa=full_name
     ).distinct()
 
-def find_named_object(model, place: ParsedName, related_name="warianty_nazw"):
+
+def find_named_object(
+    model,
+    place: ParsedName,
+    related_name="warianty_nazw",
+):
     """
     Szuka obiektu nazwanego po nazwie głównej i wszystkich wariantach.
     """
@@ -90,12 +96,14 @@ def find_named_object(model, place: ParsedName, related_name="warianty_nazw"):
 
     return model.objects.filter(pk__in=znalezione)
 
+
 def find_place(place: ParsedName):
     """
     Szuka miejsca po wszystkich znanych nazwach.
     """
 
     return find_named_object(Miejsce, place)
+
 
 def find_institution(institution: ParsedName):
     """
@@ -106,6 +114,7 @@ def find_institution(institution: ParsedName):
         Instytucja,
         institution,
     )
+
 
 def find_theme(theme: ParsedName):
     return find_named_object(Temat, theme)
@@ -125,6 +134,7 @@ def find_event(event: ParsedName):
 
 def find_library(library: ParsedName):
     return find_named_object(Biblioteka, library)
+
 
 def add_institution_variants(
     instytucja: Instytucja,
@@ -153,12 +163,14 @@ def create_institution(institution: ParsedName):
         add_variants=add_institution_variants,
     )
 
+
 def create_theme(theme: ParsedName):
     return create_named_object(
         model=Temat,
         parsed=theme,
         add_variants=lambda o, p: add_named_object_variants(
-            o, p,
+            o,
+            p,
             WariantNazwyTematu,
             "temat",
         ),
@@ -170,7 +182,8 @@ def create_genre(genre: ParsedName):
         model=Gatunek,
         parsed=genre,
         add_variants=lambda o, p: add_named_object_variants(
-            o, p,
+            o,
+            p,
             WariantNazwyGatunku,
             "gatunek",
         ),
@@ -182,7 +195,8 @@ def create_motif(motif: ParsedName):
         model=Motyw,
         parsed=motif,
         add_variants=lambda o, p: add_named_object_variants(
-            o, p,
+            o,
+            p,
             WariantNazwyMotywu,
             "motyw",
         ),
@@ -194,7 +208,8 @@ def create_event(event: ParsedName):
         model=Wydarzenie,
         parsed=event,
         add_variants=lambda o, p: add_named_object_variants(
-            o, p,
+            o,
+            p,
             WariantNazwyWydarzenia,
             "wydarzenie",
         ),
@@ -206,67 +221,102 @@ def create_library(library: ParsedName):
         model=Biblioteka,
         parsed=library,
         add_variants=lambda o, p: add_named_object_variants(
-            o, p,
+            o,
+            p,
             WariantNazwyBiblioteki,
             "biblioteka",
         ),
     )
 
 
-def get_or_create_institution(institution: ParsedName):
+def get_or_create_institution(
+    institution: ParsedName,
+    result=None,
+):
     return get_or_create_named_object(
         model=Instytucja,
         variant_model=WariantNazwyInstytucji,
         relation_field="instytucja",
         parsed=institution,
+        result=result,
+        object_type="Instytucje",
     )
 
-def get_or_create_theme(theme: ParsedName):
+
+def get_or_create_theme(
+    theme: ParsedName,
+    result=None,
+):
     return get_or_create_named_object(
         model=Temat,
         variant_model=WariantNazwyTematu,
         relation_field="temat",
         parsed=theme,
+        result=result,
+        object_type="Tematy",
     )
 
 
-def get_or_create_genre(genre: ParsedName):
+def get_or_create_genre(
+    genre: ParsedName,
+    result=None,
+):
     return get_or_create_named_object(
         model=Gatunek,
         variant_model=WariantNazwyGatunku,
         relation_field="gatunek",
         parsed=genre,
+        result=result,
+        object_type="Gatunki",
     )
 
 
-def get_or_create_motif(motif: ParsedName):
+def get_or_create_motif(
+    motif: ParsedName,
+    result=None,
+):
     return get_or_create_named_object(
         model=Motyw,
         variant_model=WariantNazwyMotywu,
         relation_field="motyw",
         parsed=motif,
+        result=result,
+        object_type="Motywy",
     )
 
 
-def get_or_create_event(event: ParsedName):
+def get_or_create_event(
+    event: ParsedName,
+    result=None,
+):
     return get_or_create_named_object(
         model=Wydarzenie,
         variant_model=WariantNazwyWydarzenia,
         relation_field="wydarzenie",
         parsed=event,
+        result=result,
+        object_type="Wydarzenia",
     )
 
 
-def get_or_create_library(library: ParsedName):
+def get_or_create_library(
+    library: ParsedName,
+    result=None,
+):
     return get_or_create_named_object(
         model=Biblioteka,
         variant_model=WariantNazwyBiblioteki,
         relation_field="biblioteka",
         parsed=library,
+        result=result,
+        object_type="Biblioteki",
     )
 
 
-def add_person_variants(osoba: Osoba, person: ParsedPerson):
+def add_person_variants(
+    osoba: Osoba,
+    person: ParsedPerson,
+):
     """
     Dodaje brakujące warianty nazw osoby.
     """
@@ -280,15 +330,23 @@ def add_person_variants(osoba: Osoba, person: ParsedPerson):
 
     warianty = []
 
-    for nazwisko in [person.nazwisko, *person.warianty_nazwiska]:
+    for nazwisko in [
+        person.nazwisko,
+        *person.warianty_nazwiska,
+    ]:
         if nazwisko is None:
             continue
 
-        for imiona in [person.imiona, *person.warianty_imion]:
+        for imiona in [
+            person.imiona,
+            *person.warianty_imion,
+        ]:
             if imiona is None:
                 continue
 
-            warianty.append(f"{nazwisko}, {imiona}")
+            warianty.append(
+                f"{nazwisko}, {imiona}"
+            )
 
     if person.nazwa:
         warianty.append(person.nazwa)
@@ -306,7 +364,13 @@ def add_person_variants(osoba: Osoba, person: ParsedPerson):
 
         kolejnosc += 1
 
-def add_named_object_variants(obj, parsed, variant_model, relation_field):
+
+def add_named_object_variants(
+    obj,
+    parsed,
+    variant_model,
+    relation_field,
+):
     """
     Dodaje brakujące warianty nazw obiektu nazwanego.
     """
@@ -318,7 +382,10 @@ def add_named_object_variants(obj, parsed, variant_model, relation_field):
 
     kolejnosc = obj.warianty_nazw.count() + 1
 
-    for nazwa in [parsed.nazwa, *parsed.warianty]:
+    for nazwa in [
+        parsed.nazwa,
+        *parsed.warianty,
+    ]:
 
         if nazwa in istniejące:
             continue
@@ -333,7 +400,11 @@ def add_named_object_variants(obj, parsed, variant_model, relation_field):
 
         kolejnosc += 1
 
-def add_place_variants(miejsce: Miejsce, place: ParsedName):
+
+def add_place_variants(
+    miejsce: Miejsce,
+    place: ParsedName,
+):
     """
     Dodaje brakujące warianty nazw miejsca.
     """
@@ -345,7 +416,12 @@ def add_place_variants(miejsce: Miejsce, place: ParsedName):
         relation_field="miejsce",
     )
 
-def create_named_object(model, parsed, add_variants):
+
+def create_named_object(
+    model,
+    parsed,
+    add_variants,
+):
     """
     Tworzy nowy obiekt nazwany.
     """
@@ -358,17 +434,23 @@ def create_named_object(model, parsed, add_variants):
 
     return obj
 
+
 def get_or_create_named_object(
     model,
     variant_model,
     relation_field,
     parsed,
+    result=None,
+    object_type=None,
 ):
     """
     Zwraca istniejący obiekt nazwany lub tworzy nowy.
     """
 
-    matches = find_named_object(model, parsed)
+    matches = find_named_object(
+        model,
+        parsed,
+    )
 
     if matches.count() == 1:
         obj = matches.first()
@@ -398,7 +480,11 @@ def get_or_create_named_object(
         ),
     )
 
+    if result is not None and object_type is not None:
+        result.add_created_object(object_type)
+
     return obj
+
 
 def create_place(place: ParsedName):
     """
@@ -411,7 +497,11 @@ def create_place(place: ParsedName):
         add_variants=add_place_variants,
     )
 
-def get_or_create_place(place: ParsedName):
+
+def get_or_create_place(
+    place: ParsedName,
+    result=None,
+):
     """
     Zwraca istniejące miejsce lub tworzy nowe.
     """
@@ -421,7 +511,10 @@ def get_or_create_place(place: ParsedName):
     if matches.count() == 1:
         miejsce = matches.first()
 
-        add_place_variants(miejsce, place)
+        add_place_variants(
+            miejsce,
+            place,
+        )
 
         return miejsce
 
@@ -430,7 +523,13 @@ def get_or_create_place(place: ParsedName):
             f"Znaleziono więcej niż jedno miejsce: {place}"
         )
 
-    return create_place(place)
+    miejsce = create_place(place)
+
+    if result is not None:
+        result.add_created_object("Miejsca")
+
+    return miejsce
+
 
 def create_person(person: ParsedPerson):
     """
@@ -450,11 +549,18 @@ def create_person(person: ParsedPerson):
             kwalifikator=person.kwalifikator or "",
         )
 
-    add_person_variants(osoba, person)
+    add_person_variants(
+        osoba,
+        person,
+    )
 
     return osoba
 
-def get_or_create_person(person: ParsedPerson):
+
+def get_or_create_person(
+    person: ParsedPerson,
+    result=None,
+):
     """
     Zwraca istniejącą osobę lub tworzy nową.
     """
@@ -464,7 +570,10 @@ def get_or_create_person(person: ParsedPerson):
     if matches.count() == 1:
         osoba = matches.first()
 
-        add_person_variants(osoba, person)
+        add_person_variants(
+            osoba,
+            person,
+        )
 
         return osoba
 
@@ -473,36 +582,65 @@ def get_or_create_person(person: ParsedPerson):
             f"Znaleziono więcej niż jedną osobę: {person}"
         )
 
-    return create_person(person)
+    osoba = create_person(person)
+
+    if result is not None:
+        result.add_created_object("Osoby")
+
+    return osoba
 
 
-def get_or_create_dictionary_object(model, parsed):
+def get_or_create_dictionary_object(
+    model,
+    parsed,
+    result=None,
+    object_type=None,
+):
     """
     Zwraca obiekt słownikowy lub tworzy nowy.
     """
 
-    obj, _ = model.objects.get_or_create(
+    obj, created = model.objects.get_or_create(
         nazwa=parsed.nazwa,
     )
 
+    if created and result is not None and object_type is not None:
+        result.add_created_object(object_type)
+
     return obj
 
-def get_or_create_language(language):
+
+def get_or_create_language(
+    language,
+    result=None,
+):
     return get_or_create_dictionary_object(
         Jezyk,
         language,
+        result=result,
+        object_type="Języki",
     )
 
 
-def get_or_create_format(format_):
+def get_or_create_format(
+    format_,
+    result=None,
+):
     return get_or_create_dictionary_object(
         Format,
         format_,
+        result=result,
+        object_type="Formaty",
     )
 
 
-def get_or_create_font(font):
+def get_or_create_font(
+    font,
+    result=None,
+):
     return get_or_create_dictionary_object(
         Czcionka,
         font,
+        result=result,
+        object_type="Czcionki",
     )

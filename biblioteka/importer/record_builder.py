@@ -63,6 +63,7 @@ def import_relations(
     builder,
     relation_model,
     relation_field,
+    result=None,
 ):
     """
     Uniwersalny importer relacji.
@@ -70,11 +71,14 @@ def import_relations(
 
     for parsed in parser(text):
 
-        obj = builder(parsed)
+        obj = builder(
+            parsed,
+            result=result,
+        )
 
         kwargs = {
-           "rekord": rekord,
-           relation_field: obj,
+            "rekord": rekord,
+            relation_field: obj,
         }
 
         if relation_type is not None:
@@ -82,12 +86,14 @@ def import_relations(
 
         relation_model.objects.create(**kwargs)
 
+
 def import_dictionary_objects(
     rekord,
     text,
     parser,
     builder,
     setter,
+    result=None,
 ):
     """
     Importuje słowniki przypisane bezpośrednio do rekordu.
@@ -95,14 +101,19 @@ def import_dictionary_objects(
 
     for parsed in parser(text):
 
-        obj = builder(parsed)
+        obj = builder(
+            parsed,
+            result=result,
+        )
 
         setter(rekord, obj)
+
 
 def import_person_relations(
     rekord,
     text,
     relation_type,
+    result=None,
 ):
     """
     Importuje relacje osób do rekordu.
@@ -116,12 +127,15 @@ def import_person_relations(
         builder=get_or_create_person,
         relation_model=RelacjaOsoby,
         relation_field="osoba",
+        result=result,
     )
+
 
 def import_place_relations(
     rekord,
     text,
     relation_type,
+    result=None,
 ):
     """
     Importuje relacje miejsc do rekordu.
@@ -135,11 +149,14 @@ def import_place_relations(
         builder=get_or_create_place,
         relation_model=RelacjaMiejsca,
         relation_field="miejsce",
+        result=result,
     )
+
 
 def import_institution_relations(
     rekord,
     text,
+    result=None,
 ):
     import_relations(
         rekord=rekord,
@@ -149,12 +166,14 @@ def import_institution_relations(
         builder=get_or_create_institution,
         relation_model=RelacjaInstytucji,
         relation_field="instytucja",
+        result=result,
     )
 
 
 def import_theme_relations(
     rekord,
     text,
+    result=None,
 ):
     import_relations(
         rekord=rekord,
@@ -164,12 +183,14 @@ def import_theme_relations(
         builder=get_or_create_theme,
         relation_model=RelacjaTematu,
         relation_field="temat",
+        result=result,
     )
 
 
 def import_genre_relations(
     rekord,
     text,
+    result=None,
 ):
     import_relations(
         rekord=rekord,
@@ -179,12 +200,14 @@ def import_genre_relations(
         builder=get_or_create_genre,
         relation_model=RelacjaGatunku,
         relation_field="gatunek",
+        result=result,
     )
 
 
 def import_motif_relations(
     rekord,
     text,
+    result=None,
 ):
     import_relations(
         rekord=rekord,
@@ -194,12 +217,14 @@ def import_motif_relations(
         builder=get_or_create_motif,
         relation_model=RelacjaMotywu,
         relation_field="motyw",
+        result=result,
     )
 
 
 def import_event_relations(
     rekord,
     text,
+    result=None,
 ):
     import_relations(
         rekord=rekord,
@@ -209,11 +234,14 @@ def import_event_relations(
         builder=get_or_create_event,
         relation_model=RelacjaWydarzenia,
         relation_field="wydarzenie",
+        result=result,
     )
+
 
 def import_languages(
     rekord,
     text,
+    result=None,
 ):
     import_dictionary_objects(
         rekord=rekord,
@@ -221,11 +249,14 @@ def import_languages(
         parser=parse_named_objects,
         builder=get_or_create_language,
         setter=lambda rekord, obj: rekord.jezyki.add(obj),
+        result=result,
     )
+
 
 def import_fonts(
     rekord,
     text,
+    result=None,
 ):
     import_dictionary_objects(
         rekord=rekord,
@@ -233,12 +264,14 @@ def import_fonts(
         parser=parse_named_objects,
         builder=get_or_create_font,
         setter=lambda rekord, obj: rekord.czcionki.add(obj),
+        result=result,
     )
 
 
 def import_format(
     rekord,
     value,
+    result=None,
 ):
     """
     Importuje format rekordu.
@@ -249,8 +282,13 @@ def import_format(
 
     parsed = parse_named_objects(f"{value}°")
 
-    rekord.format = get_or_create_format(parsed[0])
+    rekord.format = get_or_create_format(
+        parsed[0],
+        result=result,
+    )
+
     rekord.save(update_fields=["format"])
+
 
 def import_digitalizations(
     rekord,
@@ -276,6 +314,7 @@ def import_digitalizations(
             link=link,
             kolejnosc=i,
         )
+
 
 def import_thumbnail(
     rekord,
@@ -306,14 +345,13 @@ def import_thumbnail(
 def create_record(
     mapped,
     uzytkownik,
+    result=None,
 ):
     """
     Tworzy podstawowy obiekt Rekord.
 
     Na tym etapie bez relacji.
     """
-
-    
 
     rekord = Rekord.objects.create(
         tytul_skrocony=mapped.get("tytul_skrocony") or "",
@@ -344,76 +382,90 @@ def create_record(
         rekord,
         mapped.get("autorzy"),
         "autor",
+        result=result,
     )
 
     import_person_relations(
         rekord,
         mapped.get("drukarze"),
         "drukarz",
+        result=result,
     )
 
     import_person_relations(
         rekord,
         mapped.get("adresaci_dedykacji"),
         "adresat",
+        result=result,
     )
 
     import_person_relations(
         rekord,
         mapped.get("powiazane_osoby"),
         "powiazana",
+        result=result,
     )
 
     import_place_relations(
         rekord,
         mapped.get("miejsce_wydania"),
         "wydania",
+        result=result,
     )
 
     import_place_relations(
         rekord,
         mapped.get("powiazane_miejsca"),
         "powiazane",
+        result=result,
     )
 
     import_institution_relations(
-    rekord,
-    mapped.get("powiazane_instytucje"),
+        rekord,
+        mapped.get("powiazane_instytucje"),
+        result=result,
     )
 
     import_theme_relations(
         rekord,
         mapped.get("tematy"),
+        result=result,
     )
 
     import_genre_relations(
         rekord,
         mapped.get("gatunki"),
+        result=result,
     )
 
     import_motif_relations(
         rekord,
         mapped.get("motywy"),
+        result=result,
     )
 
     import_event_relations(
         rekord,
         mapped.get("wydarzenia"),
+        result=result,
     )
 
     import_languages(
-    rekord,
-    mapped.get("jezyki"),
+        rekord,
+        mapped.get("jezyki"),
+        result=result,
     )
 
     import_fonts(
         rekord,
         mapped.get("czcionki"),
+        result=result,
     )
 
     import_format(
         rekord,
         mapped.get("format"),
+        result=result,
     )
 
     import_digitalizations(

@@ -49,6 +49,16 @@ def build_report(import_danych, result=None):
         f"Załączniki: {import_danych.liczba_zalacznikow}\n"
     )
 
+    if result is not None and result.objects_created:
+
+        output.write("\nNOWE OBIEKTY\n")
+
+        for object_type, count in result.objects_created.items():
+
+            output.write(
+                f"{object_type}: {count}\n"
+            )
+
     if result is not None:
 
         output.write("\n")

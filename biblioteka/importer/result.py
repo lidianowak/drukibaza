@@ -21,8 +21,17 @@ class ImportResult:
     specimens: int = 0
     attachments: int = 0
 
+    objects_created: dict[str, int] = field(
+        default_factory=dict
+    )
+
     errors: list[ImportErrorItem] = field(default_factory=list)
     warnings: list[ImportErrorItem] = field(default_factory=list)
+
+    def add_created_object(self, object_type):
+        self.objects_created[object_type] = (
+            self.objects_created.get(object_type, 0) + 1
+        )
 
     def add_error(
         self,

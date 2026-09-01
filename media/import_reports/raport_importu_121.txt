@@ -1,0 +1,19 @@
+RAPORT IMPORTU
+
+Status: Błąd
+Data: 31.08.2026 01:44:17
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 0
+Egzemplarze: 0
+Załączniki: 0
+
+WALIDACJA
+
+BŁĘDY KRYTYCZNE:
+- Brak tytułu skróconego. | arkusz: Rekordy | wiersz: 17 | pole: Tytuł skrócony
+
+OSTRZEŻENIA:
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania
+- Możliwy duplikat rekordu: w bazie istnieje już rekord o tym samym autorze, drukarzu i roku wydania. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y), Drukarz, Rok wydania

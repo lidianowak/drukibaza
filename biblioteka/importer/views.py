@@ -55,6 +55,8 @@ def finalize_import(
     import_danych.liczba_egzemplarzy = result.specimens
     import_danych.liczba_zalacznikow = result.attachments
 
+    import_danych.statystyki_obiektow = result.objects_created
+
     import_danych.data_zakonczenia = timezone.now()
 
     import_danych.czas_trwania = (

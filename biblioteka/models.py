@@ -1103,6 +1103,11 @@ class ImportDanych(models.Model):
         default=0,
     )
 
+    statystyki_obiektow = models.JSONField(
+        default=dict,
+        blank=True,
+    )
+
     czas_trwania = models.DurationField(
         null=True,
         blank=True,
