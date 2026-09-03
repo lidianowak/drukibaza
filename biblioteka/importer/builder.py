@@ -38,17 +38,10 @@ def normalize_for_comparison(text):
     """
     Przygotowuje tekst do porównania fuzzy.
 
-    Ignoruje wielkość liter, nadmiarowe spacje
-    oraz znaki diakrytyczne.
+    Ignoruje wielkość liter i nadmiarowe spacje.
     """
 
-    text = text.strip().lower()
-
-    return "".join(
-        znak
-        for znak in unicodedata.normalize("NFD", text)
-        if unicodedata.category(znak) != "Mn"
-    )
+    return text.strip().lower()
 
 
 def damerau_levenshtein_distance(text1, text2):
@@ -128,7 +121,11 @@ def find_fuzzy_match(
     for obj in model.objects.all():
         nazwy = [obj.nazwa]
 
-        warianty = getattr(obj, related_name, None)
+        warianty = (
+            getattr(obj, related_name, None)
+            if related_name is not None
+            else None
+        )
 
         if warianty is not None:
             nazwy.extend(
@@ -239,6 +236,20 @@ def find_fuzzy_person_match(person):
                     obj,
                     obj.imiona,
                     "imieniu",
+                )
+            )
+
+        elif (
+            nazwisko_distance <= 1
+            and imiona_distance <= 1
+            and nazwisko_distance + imiona_distance <= 2
+        ):
+            kandydaci.append(
+                (
+                    nazwisko_distance + imiona_distance,
+                    obj,
+                    f"{obj.nazwisko}, {obj.imiona}",
+                    "osobie",
                 )
             )
 
@@ -763,23 +774,7 @@ def get_or_create_place(
             f"Znaleziono więcej niż jedno miejsce: {place}"
         )
 
-    fuzzy_match = find_fuzzy_match(
-        model=Miejsce,
-        nazwa=place.nazwa,
-    )
 
-    if fuzzy_match is not None and result is not None:
-        podobny_obj, podobna_nazwa = fuzzy_match
-
-        result.add_warning(
-            message=(
-                f"Możliwa literówka w nazwie miejsca: "
-                f"„{place.nazwa}”. "
-                f"Istnieje podobne miejsce: „{podobna_nazwa}”. "
-                "Sprawdź poprawność danych i usuń niepoprawne obiekty."
-            ),
-            field="Miejsce",
-        )
 
     miejsce = create_place(place)
 
@@ -840,25 +835,7 @@ def get_or_create_person(
             f"Znaleziono więcej niż jedną osobę: {person}"
         )
 
-    fuzzy_match = find_fuzzy_person_match(person)
 
-    if fuzzy_match is not None:
-        osoba, podobna_nazwa, rodzaj = fuzzy_match
-
-        if result is not None:
-            result.add_warning(
-                f"Możliwa literówka w {rodzaj} osoby: "
-                f"„{podobna_nazwa}”. "
-                f"Wprowadzono: „{person.nazwa or person.nazwisko + ', ' + person.imiona}”.",
-                field="osoba",
-            )
-
-        add_person_variants(
-            osoba,
-            person,
-        )
-
-        return osoba
 
     osoba = create_person(person)
 
@@ -879,24 +856,6 @@ def get_or_create_dictionary_object(
     Zwraca obiekt słownikowy lub tworzy nowy.
     """
 
-    if fuzzy:
-        fuzzy_match = find_fuzzy_match(
-            model,
-            parsed.nazwa,
-        )
-
-        if fuzzy_match is not None:
-            obj, podobna_nazwa = fuzzy_match
-
-            if result is not None:
-                result.add_warning(
-                    f"Możliwa literówka w nazwie: "
-                    f"„{parsed.nazwa}”. "
-                    f"Istnieje podobny obiekt: „{podobna_nazwa}”.",
-                    field=object_type,
-                )
-
-            return obj
 
     obj, created = model.objects.get_or_create(
         nazwa=parsed.nazwa,

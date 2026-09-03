@@ -1,0 +1,27 @@
+RAPORT IMPORTU
+
+Status: Gotowy do importu
+Data: 04.09.2026 01:49:32
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 2
+Egzemplarze: 1
+Załączniki: 0
+
+WALIDACJA
+
+OSTRZEŻENIA:
+- Możliwa literówka w danych osoby: „Opaliński”. Wprowadzono: „Opalinski, Andrzej”. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y)
+- Możliwa literówka w danych osoby: „Piotrowski”. Wprowadzono: „Piotrofski, Karol”. | arkusz: Rekordy | wiersz: 16 | pole: Adresat dedykacji
+- Możliwa literówka w danych osoby: „Bieżanowski, Stanisław”. Wprowadzono: „Biezanowski, Stanislaw”. | arkusz: Rekordy | wiersz: 16 | pole: Powiązane osoby
+- Możliwa literówka w nazwie miejsca: „Karków”. Istnieje podobne miejsce: „Kraków”. | arkusz: Rekordy | wiersz: 16 | pole: Miejsce wydania
+- Możliwa literówka w nazwie miejsca: „Warsawa”. Istnieje podobne miejsce: „Warszawa”. | arkusz: Rekordy | wiersz: 16 | pole: Powiązane miejsca
+- Możliwa literówka w nazwie: „AkademiaKrakowska”. Istnieje podobny obiekt: „Akademia Krakowska”. | arkusz: Rekordy | wiersz: 16 | pole: Powiązane instytucje
+- Możliwa literówka w nazwie: „ingress”. Istnieje podobny obiekt: „ingres”. | arkusz: Rekordy | wiersz: 16 | pole: Tematy
+- Możliwa literówka w nazwie: „kvestia”. Istnieje podobny obiekt: „kwestia”. | arkusz: Rekordy | wiersz: 16 | pole: Gatunki
+- Możliwa literówka w nazwie: „śmieć”. Istnieje podobny obiekt: „śmierć”. | arkusz: Rekordy | wiersz: 16 | pole: Motywy
+- Możliwa literówka w nazwie: „bitwa pod wieniem”. Istnieje podobny obiekt: „bitwa pod Wiedniem”. | arkusz: Rekordy | wiersz: 16 | pole: Wydarzenia
+- Możliwa literówka w nazwie języka: „łacińskii”. Istnieje podobny język: „łaciński”. | arkusz: Rekordy | wiersz: 16 | pole: Język
+- Możliwa literówka w nazwie miejsca: „War szawa”. Istnieje podobne miejsce: „Warszawa”. | arkusz: Rekordy | wiersz: 17 | pole: Miejsce wydania
+- Możliwa literówka w nazwie biblioteki: „Biblioteka Jagielońska”. Istnieje podobna biblioteka: „Biblioteka Jagiellońska”. | arkusz: Egzemplarze | wiersz: 2 | pole: Biblioteka

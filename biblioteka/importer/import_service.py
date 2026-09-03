@@ -246,6 +246,257 @@ def check_existing_duplicate_records(mapped_records, result):
                     field="Autor(y), Drukarz, Rok wydania",
                 )
 
+def check_fuzzy_matches(mapped_records, result):
+    """
+    Sprawdza, czy wartości z importu nie są prawdopodobnymi
+    literówkami istniejących obiektów w bazie.
+    Nie modyfikuje bazy danych.
+    """
+
+    from biblioteka.importer.builder import (
+        find_fuzzy_match,
+        find_fuzzy_person_match,
+    )
+
+    from biblioteka.importer.object_parser import (
+        parse_persons,
+        parse_places,
+        parse_institutions,
+        parse_themes,
+        parse_genres,
+        parse_motifs,
+        parse_events,
+        parse_named_objects,
+    )
+
+    from biblioteka.models import (
+        Miejsce,
+        Instytucja,
+        Temat,
+        Gatunek,
+        Motyw,
+        Wydarzenie,
+        Jezyk,
+    )
+
+    for mapped in mapped_records:
+
+        row = mapped["_excel_row"]
+
+        # ---------- Osoby ----------
+
+        person_fields = {
+            "autorzy": "Autor(y)",
+            "drukarze": "Drukarz",
+            "adresaci_dedykacji": "Adresat dedykacji",
+            "powiazane_osoby": "Powiązane osoby",
+        }
+
+        for field_name, field_label in person_fields.items():
+
+            persons = parse_persons(
+                mapped.get(field_name) or ""
+            )
+
+            for person in persons:
+
+                fuzzy_match = find_fuzzy_person_match(person)
+
+                if fuzzy_match is None:
+                    continue
+
+                osoba, podobna_nazwa, rodzaj = fuzzy_match
+
+                if person.nazwa:
+                    wprowadzona_nazwa = person.nazwa
+                else:
+                    wprowadzona_nazwa = (
+                        f"{person.nazwisko}, {person.imiona}"
+                    )
+
+                result.add_warning(
+                    message=(
+                        f"Możliwa literówka w danych osoby: "
+                        f"„{podobna_nazwa}”. "
+                        f"Wprowadzono: „{wprowadzona_nazwa}”."
+                    ),
+                    sheet="Rekordy",
+                    row=row,
+                    field=field_label,
+                )
+
+        # ---------- Miejsca ----------
+
+        place_fields = {
+            "miejsce_wydania": "Miejsce wydania",
+            "powiazane_miejsca": "Powiązane miejsca",
+        }
+
+        for field_name, field_label in place_fields.items():
+
+            places = parse_places(
+                mapped.get(field_name) or ""
+            )
+
+            for place in places:
+
+                fuzzy_match = find_fuzzy_match(
+                    Miejsce,
+                    place.nazwa,
+                )
+
+                if fuzzy_match is None:
+                    continue
+
+                _, podobna_nazwa = fuzzy_match
+
+                result.add_warning(
+                    message=(
+                        f"Możliwa literówka w nazwie miejsca: "
+                        f"„{place.nazwa}”. "
+                        f"Istnieje podobne miejsce: "
+                        f"„{podobna_nazwa}”."
+                    ),
+                    sheet="Rekordy",
+                    row=row,
+                    field=field_label,
+                )
+
+        # ---------- Pozostałe obiekty nazwane ----------
+
+        named_object_fields = {
+            "powiazane_instytucje": (
+                parse_institutions,
+                Instytucja,
+                "Powiązane instytucje",
+            ),
+            "tematy": (
+                parse_themes,
+                Temat,
+                "Tematy",
+            ),
+            "gatunki": (
+                parse_genres,
+                Gatunek,
+                "Gatunki",
+            ),
+            "motywy": (
+                parse_motifs,
+                Motyw,
+                "Motywy",
+            ),
+            "wydarzenia": (
+                parse_events,
+                Wydarzenie,
+                "Wydarzenia",
+            ),
+        }
+
+        for field_name, (
+            parser,
+            model,
+            field_label,
+        ) in named_object_fields.items():
+
+            objects = parser(
+                mapped.get(field_name) or ""
+            )
+
+            for parsed in objects:
+
+                fuzzy_match = find_fuzzy_match(
+                    model,
+                    parsed.nazwa,
+                )
+
+                if fuzzy_match is None:
+                    continue
+
+                _, podobna_nazwa = fuzzy_match
+
+                result.add_warning(
+                    message=(
+                        f"Możliwa literówka w nazwie: "
+                        f"„{parsed.nazwa}”. "
+                        f"Istnieje podobny obiekt: "
+                        f"„{podobna_nazwa}”."
+                    ),
+                    sheet="Rekordy",
+                    row=row,
+                    field=field_label,
+                )
+
+        # ---------- Język ----------
+
+        languages = parse_named_objects(
+            mapped.get("jezyki") or ""
+        )
+
+        for language in languages:
+
+            fuzzy_match = find_fuzzy_match(
+                Jezyk,
+                language.nazwa,
+                related_name=None,
+            )
+
+            if fuzzy_match is None:
+                continue
+
+            _, podobna_nazwa = fuzzy_match
+
+            result.add_warning(
+                message=(
+                    f"Możliwa literówka w nazwie języka: "
+                    f"„{language.nazwa}”. "
+                    f"Istnieje podobny język: "
+                    f"„{podobna_nazwa}”."
+                ),
+                sheet="Rekordy",
+                row=row,
+                field="Język",
+            )
+
+def check_fuzzy_specimens(mapped_specimens, result):
+    """
+    Sprawdza, czy biblioteki podane w arkuszu Egzemplarze
+    nie są prawdopodobnymi literówkami istniejących bibliotek.
+    Nie modyfikuje bazy danych.
+    """
+
+    from biblioteka.importer.builder import find_fuzzy_match
+    from biblioteka.importer.object_parser import parse_named_objects
+    from biblioteka.models import Biblioteka
+
+    for row, mapped in enumerate(mapped_specimens, start=2):
+
+        libraries = parse_named_objects(
+            mapped.get("biblioteka") or ""
+        )
+
+        for library in libraries:
+
+            fuzzy_match = find_fuzzy_match(
+                Biblioteka,
+                library.nazwa,
+            )
+
+            if fuzzy_match is None:
+                continue
+
+            _, podobna_nazwa = fuzzy_match
+
+            result.add_warning(
+                message=(
+                    f"Możliwa literówka w nazwie biblioteki: "
+                    f"„{library.nazwa}”. "
+                    f"Istnieje podobna biblioteka: "
+                    f"„{podobna_nazwa}”."
+                ),
+                sheet="Egzemplarze",
+                row=row,
+                field="Biblioteka",
+            )
 
 def validate_import(
     mapped_records,
@@ -509,6 +760,16 @@ def run_import(
             validator,
             result,
             import_ids,
+        )
+
+        check_fuzzy_matches(
+            mapped_records,
+            result,
+        )
+
+        check_fuzzy_specimens(
+            mapped_specimens,
+            result,
         )
 
         if result.errors:

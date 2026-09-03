@@ -1,0 +1,23 @@
+RAPORT IMPORTU
+
+Status: Zakończony
+Data: 03.09.2026 03:56:55
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 1
+Egzemplarze: 0
+Załączniki: 0
+
+NOWE OBIEKTY
+Miejsca: 2
+Gatunki: 1
+
+WALIDACJA
+
+OSTRZEŻENIA:
+- Możliwa literówka w nazwisku osoby: „Nowak”. Wprowadzono: „Nofak, Lidia”. | pole: osoba
+- Możliwa literówka w nazwie miejsca: „Krakóf”. Istnieje podobne miejsce: „Kraków”. Sprawdź poprawność danych i usuń niepoprawne obiekty. | pole: Miejsce
+- Możliwa literówka w nazwie miejsca: „Lubin”. Istnieje podobne miejsce: „Lublin”. Sprawdź poprawność danych i usuń niepoprawne obiekty. | pole: Miejsce
+- Możliwa literówka w nazwie: „kvestia”. Istnieje podobny obiekt: „kwestia”. Sprawdź poprawność danych i usuń niepoprawne obiekty. | pole: Gatunki
+- Możliwa literówka w nazwie: „łacińskii”. Istnieje podobny obiekt: „łaciński”. | pole: Języki

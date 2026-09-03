@@ -1,0 +1,357 @@
+[1mdiff --git a/biblioteka/importer/builder.py b/biblioteka/importer/builder.py[m
+[1mindex 657e854..4e9fb6f 100644[m
+[1m--- a/biblioteka/importer/builder.py[m
+[1m+++ b/biblioteka/importer/builder.py[m
+[36m@@ -32,6 +32,226 @@[m [mfrom biblioteka.importer.object_parser import ([m
+     ParsedName,[m
+ )[m
+ [m
+[32m+[m[32mimport unicodedata[m
+[32m+[m
+[32m+[m[32mdef normalize_for_comparison(text):[m
+[32m+[m[32m    """[m
+[32m+[m[32m    Przygotowuje tekst do porównania fuzzy.[m
+[32m+[m
+[32m+[m[32m    Ignoruje wielkość liter, nadmiarowe spacje[m
+[32m+[m[32m    oraz znaki diakrytyczne.[m
+[32m+[m[32m    """[m
+[32m+[m
+[32m+[m[32m    text = text.strip().lower()[m
+[32m+[m
+[32m+[m[32m    return "".join([m
+[32m+[m[32m        znak[m
+[32m+[m[32m        for znak in unicodedata.normalize("NFD", text)[m
+[32m+[m[32m        if unicodedata.category(znak) != "Mn"[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef damerau_levenshtein_distance(text1, text2):[m
+[32m+[m[32m    """[m
+[32m+[m[32m    Oblicza odległość Damerau-Levenshteina.[m
+[32m+[m
+[32m+[m[32m    Uwzględnia:[m
+[32m+[m[32m    - dodanie znaku,[m
+[32m+[m[32m    - usunięcie znaku,[m
+[32m+[m[32m    - zamianę znaku,[m
+[32m+[m[32m    - przestawienie dwóch sąsiednich znaków.[m
+[32m+[m[32m    """[m
+[32m+[m
+[32m+[m[32m    if text1 == text2:[m
+[32m+[m[32m        return 0[m
+[32m+[m
+[32m+[m[32m    if not text1:[m
+[32m+[m[32m        return len(text2)[m
+[32m+[m
+[32m+[m[32m    if not text2:[m
+[32m+[m[32m        return len(text1)[m
+[32m+[m
+[32m+[m[32m    previous_previous = None[m
+[32m+[m[32m    previous = list(range(len(text2) + 1))[m
+[32m+[m
+[32m+[m[32m    for i, char1 in enumerate(text1, start=1):[m
+[32m+[m[32m        current = [i][m
+[32m+[m
+[32m+[m[32m        for j, char2 in enumerate(text2, start=1):[m
+[32m+[m[32m            cost = 0 if char1 == char2 else 1[m
+[32m+[m
+[32m+[m[32m            value = min([m
+[32m+[m[32m                current[j - 1] + 1,[m
+[32m+[m[32m                previous[j] + 1,[m
+[32m+[m[32m                previous[j - 1] + cost,[m
+[32m+[m[32m            )[m
+[32m+[m
+[32m+[m[32m            if ([m
+[32m+[m[32m                previous_previous is not None[m
+[32m+[m[32m                and i > 1[m
+[32m+[m[32m                and j > 1[m
+[32m+[m[32m                and char1 == text2[j - 2][m
+[32m+[m[32m                and text1[i - 2] == char2[m
+[32m+[m[32m            ):[m
+[32m+[m[32m                value = min([m
+[32m+[m[32m                    value,[m
+[32m+[m[32m                    previous_previous[j - 2] + 1,[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m            current.append(value)[m
+[32m+[m
+[32m+[m[32m        previous_previous = previous[m
+[32m+[m[32m        previous = current[m
+[32m+[m
+[32m+[m[32m    return previous[-1][m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef find_fuzzy_match([m
+[32m+[m[32m    model,[m
+[32m+[m[32m    nazwa,[m
+[32m+[m[32m    related_name="warianty_nazw",[m
+[32m+[m[32m):[m
+[32m+[m[32m    """[m
+[32m+[m[32m    Szuka istniejącego obiektu o nazwie bardzo podobnej[m
+[32m+[m[32m    do podanej nazwy.[m
+[32m+[m
+[32m+[m[32m    Wykrywa przede wszystkim prawdopodobne literówki.[m
+[32m+[m[32m    """[m
+[32m+[m
+[32m+[m[32m    nazwa_porownawcza = normalize_for_comparison(nazwa)[m
+[32m+[m
+[32m+[m[32m    if len(nazwa_porownawcza) < 4:[m
+[32m+[m[32m        return None[m
+[32m+[m
+[32m+[m[32m    kandydaci = [][m
+[32m+[m
+[32m+[m[32m    for obj in model.objects.all():[m
+[32m+[m[32m        nazwy = [obj.nazwa][m
+[32m+[m
+[32m+[m[32m        warianty = getattr(obj, related_name, None)[m
+[32m+[m
+[32m+[m[32m        if warianty is not None:[m
+[32m+[m[32m            nazwy.extend([m
+[32m+[m[32m                wariant.nazwa[m
+[32m+[m[32m                for wariant in warianty.all()[m
+[32m+[m[32m            )[m
+[32m+[m
+[32m+[m[32m        for kandydat in nazwy:[m
+[32m+[m[32m            kandydat_porownawczy = normalize_for_comparison([m
+[32m+[m[32m                kandydat[m
+[32m+[m[32m            )[m
+[32m+[m
+[32m+[m[32m            if kandydat_porownawczy == nazwa_porownawcza:[m
+[32m+[m[32m                continue[m
+[32m+[m
+[32m+[m[32m            distance = damerau_levenshtein_distance([m
+[32m+[m[32m                nazwa_porownawcza,[m
+[32m+[m[32m                kandydat_porownawczy,[m
+[32m+[m[32m            )[m
+[32m+[m
+[32m+[m[32m            max_distance = 1[m
+[32m+[m
+[32m+[m[32m            if len(nazwa_porownawcza) >= 10:[m
+[32m+[m[32m                max_distance = 2[m
+[32m+[m
+[32m+[m[32m            if distance <= max_distance:[m
+[32m+[m[32m                kandydaci.append([m
+[32m+[m[32m                    (distance, obj, kandydat)[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m    if not kandydaci:[m
+[32m+[m[32m        return None[m
+[32m+[m
+[32m+[m[32m    kandydaci.sort([m
+[32m+[m[32m        key=lambda item: item[0][m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    najlepszy = kandydaci[0][m
+[32m+[m
+[32m+[m[32m    return najlepszy[1], najlepszy[2][m
+[32m+[m
+[32m+[m[32mdef find_fuzzy_person_match(person):[m
+[32m+[m[32m    """[m
+[32m+[m[32m    Szuka istniejącej osoby o nazwie bardzo podobnej[m
+[32m+[m[32m    do podanej osoby.[m
+[32m+[m
+[32m+[m[32m    Dla osób klasycznych porównuje osobno nazwisko i imiona.[m
+[32m+[m[32m    Dla osób jednoczłonowych porównuje nazwę.[m
+[32m+[m[32m    Kwalifikator musi być zgodny dokładnie.[m
+[32m+[m[32m    """[m
+[32m+[m
+[32m+[m[32m    kandydaci = [][m
+[32m+[m
+[32m+[m[32m    for obj in Osoba.objects.all():[m
+[32m+[m
+[32m+[m[32m        kwalifikator = person.kwalifikator or ""[m
+[32m+[m
+[32m+[m[32m        if kwalifikator != obj.kwalifikator:[m
+[32m+[m[32m            continue[m
+[32m+[m
+[32m+[m[32m        if person.nazwa:[m
+[32m+[m[32m            if not obj.nazwisko:[m
+[32m+[m[32m                distance = damerau_levenshtein_distance([m
+[32m+[m[32m                    normalize_for_comparison(person.nazwa),[m
+[32m+[m[32m                    normalize_for_comparison(obj.imiona),[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m                if distance <= 1:[m
+[32m+[m[32m                    kandydaci.append([m
+[32m+[m[32m                        (distance, obj, obj.imiona)[m
+[32m+[m[32m                    )[m
+[32m+[m
+[32m+[m[32m            continue[m
+[32m+[m
+[32m+[m[32m        if not obj.nazwisko:[m
+[32m+[m[32m            continue[m
+[32m+[m
+[32m+[m[32m        nazwisko_distance = damerau_levenshtein_distance([m
+[32m+[m[32m            normalize_for_comparison(person.nazwisko),[m
+[32m+[m[32m            normalize_for_comparison(obj.nazwisko),[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        imiona_distance = damerau_levenshtein_distance([m
+[32m+[m[32m            normalize_for_comparison(person.imiona),[m
+[32m+[m[32m            normalize_for_comparison(obj.imiona),[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        if ([m
+[32m+[m[32m            nazwisko_distance <= 1[m
+[32m+[m[32m            and imiona_distance == 0[m
+[32m+[m[32m        ):[m
+[32m+[m[32m            kandydaci.append([m
+[32m+[m[32m                ([m
+[32m+[m[32m                    nazwisko_distance,[m
+[32m+[m[32m                    obj,[m
+[32m+[m[32m                    obj.nazwisko,[m
+[32m+[m[32m                    "nazwisku",[m
+[32m+[m[32m                )[m
+[32m+[m[32m            )[m
+[32m+[m
+[32m+[m[32m        elif ([m
+[32m+[m[32m            nazwisko_distance == 0[m
+[32m+[m[32m            and imiona_distance <= 1[m
+[32m+[m[32m        ):[m
+[32m+[m[32m            kandydaci.append([m
+[32m+[m[32m                ([m
+[32m+[m[32m                    imiona_distance,[m
+[32m+[m[32m                    obj,[m
+[32m+[m[32m                    obj.imiona,[m
+[32m+[m[32m                    "imieniu",[m
+[32m+[m[32m                )[m
+[32m+[m[32m            )[m
+[32m+[m
+[32m+[m[32m    if not kandydaci:[m
+[32m+[m[32m        return None[m
+[32m+[m
+[32m+[m[32m    kandydaci.sort([m
+[32m+[m[32m        key=lambda item: item[0][m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    najlepszy = kandydaci[0][m
+[32m+[m
+[32m+[m[32m    return najlepszy[1], najlepszy[2], najlepszy[3][m
+ [m
+ def find_person(person: ParsedPerson):[m
+     """[m
+[36m@@ -469,6 +689,24 @@[m [mdef get_or_create_named_object([m
+             f"Znaleziono więcej niż jeden obiekt: {parsed.nazwa}"[m
+         )[m
+ [m
+[32m+[m[32m    fuzzy_match = find_fuzzy_match([m
+[32m+[m[32m        model=model,[m
+[32m+[m[32m        nazwa=parsed.nazwa,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    if fuzzy_match is not None and result is not None:[m
+[32m+[m[32m        podobny_obj, podobna_nazwa = fuzzy_match[m
+[32m+[m
+[32m+[m[32m        result.add_warning([m
+[32m+[m[32m            message=([m
+[32m+[m[32m                f"Możliwa literówka w nazwie: „{parsed.nazwa}”. "[m
+[32m+[m[32m                f"Istnieje podobny obiekt: „{podobna_nazwa}”. "[m
+[32m+[m[32m                "Sprawdź poprawność danych i usuń niepoprawne obiekty."[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            field=object_type,[m
+[32m+[m[32m        )[m
+[32m+[m[41m    [m
+[32m+[m
+     obj = create_named_object([m
+         model=model,[m
+         parsed=parsed,[m
+[36m@@ -502,6 +740,8 @@[m [mdef get_or_create_place([m
+     place: ParsedName,[m
+     result=None,[m
+ ):[m
+[32m+[m
+[32m+[m[41m    [m
+     """[m
+     Zwraca istniejące miejsce lub tworzy nowe.[m
+     """[m
+[36m@@ -523,6 +763,24 @@[m [mdef get_or_create_place([m
+             f"Znaleziono więcej niż jedno miejsce: {place}"[m
+         )[m
+ [m
+[32m+[m[32m    fuzzy_match = find_fuzzy_match([m
+[32m+[m[32m        model=Miejsce,[m
+[32m+[m[32m        nazwa=place.nazwa,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m[32m    if fuzzy_match is not None and result is not None:[m
+[32m+[m[32m        podobny_obj, podobna_nazwa = fuzzy_match[m
+[32m+[m
+[32m+[m[32m        result.add_warning([m
+[32m+[m[32m            message=([m
+[32m+[m[32m                f"Możliwa literówka w nazwie miejsca: "[m
+[32m+[m[32m                f"„{place.nazwa}”. "[m
+[32m+[m[32m                f"Istnieje podobne miejsce: „{podobna_nazwa}”. "[m
+[32m+[m[32m                "Sprawdź poprawność danych i usuń niepoprawne obiekty."[m
+[32m+[m[32m            ),[m
+[32m+[m[32m            field="Miejsce",[m
+[32m+[m[32m        )[m
+[32m+[m
+     miejsce = create_place(place)[m
+ [m
+     if result is not None:[m
+[36m@@ -582,6 +840,26 @@[m [mdef get_or_create_person([m
+             f"Znaleziono więcej niż jedną osobę: {person}"[m
+         )[m
+ [m
+[32m+[m[32m    fuzzy_match = find_fuzzy_person_match(person)[m
+[32m+[m
+[32m+[m[32m    if fuzzy_match is not None:[m
+[32m+[m[32m        osoba, podobna_nazwa, rodzaj = fuzzy_match[m
+[32m+[m
+[32m+[m[32m        if result is not None:[m
+[32m+[m[32m            result.add_warning([m
+[32m+[m[32m                f"Możliwa literówka w {rodzaj} osoby: "[m
+[32m+[m[32m                f"„{podobna_nazwa}”. "[m
+[32m+[m[32m                f"Wprowadzono: „{person.nazwa or person.nazwisko + ', ' + person.imiona}”.",[m
+[32m+[m[32m                field="osoba",[m
+[32m+[m[32m            )[m
+[32m+[m
+[32m+[m[32m        add_person_variants([m
+[32m+[m[32m            osoba,[m
+[32m+[m[32m            person,[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        return osoba[m
+[32m+[m
+     osoba = create_person(person)[m
+ [m
+     if result is not None:[m
+[36m@@ -595,11 +873,31 @@[m [mdef get_or_create_dictionary_object([m
+     parsed,[m
+     result=None,[m
+     object_type=None,[m
+[32m+[m[32m    fuzzy=False,[m
+ ):[m
+     """[m
+     Zwraca obiekt słownikowy lub tworzy nowy.[m
+     """[m
+ [m
+[32m+[m[32m    if fuzzy:[m
+[32m+[m[32m        fuzzy_match = find_fuzzy_match([m
+[32m+[m[32m            model,[m
+[32m+[m[32m            parsed.nazwa,[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m        if fuzzy_match is not None:[m
+[32m+[m[32m            obj, podobna_nazwa = fuzzy_match[m
+[32m+[m
+[32m+[m[32m            if result is not None:[m
+[32m+[m[32m                result.add_warning([m
+[32m+[m[32m                    f"Możliwa literówka w nazwie: "[m
+[32m+[m[32m                    f"„{parsed.nazwa}”. "[m
+[32m+[m[32m                    f"Istnieje podobny obiekt: „{podobna_nazwa}”.",[m
+[32m+[m[32m                    field=object_type,[m
+[32m+[m[32m                )[m
+[32m+[m
+[32m+[m[32m            return obj[m
+[32m+[m
+     obj, created = model.objects.get_or_create([m
+         nazwa=parsed.nazwa,[m
+     )[m
+[36m@@ -619,6 +917,7 @@[m [mdef get_or_create_language([m
+         language,[m
+         result=result,[m
+         object_type="Języki",[m
+[32m+[m[32m        fuzzy=True,[m
+     )[m
+ [m
+ [m
