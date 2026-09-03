@@ -32,6 +32,226 @@ from biblioteka.importer.object_parser import (
     ParsedName,
 )
 
+import unicodedata
+
+def normalize_for_comparison(text):
+    """
+    Przygotowuje tekst do porównania fuzzy.
+
+    Ignoruje wielkość liter, nadmiarowe spacje
+    oraz znaki diakrytyczne.
+    """
+
+    text = text.strip().lower()
+
+    return "".join(
+        znak
+        for znak in unicodedata.normalize("NFD", text)
+        if unicodedata.category(znak) != "Mn"
+    )
+
+
+def damerau_levenshtein_distance(text1, text2):
+    """
+    Oblicza odległość Damerau-Levenshteina.
+
+    Uwzględnia:
+    - dodanie znaku,
+    - usunięcie znaku,
+    - zamianę znaku,
+    - przestawienie dwóch sąsiednich znaków.
+    """
+
+    if text1 == text2:
+        return 0
+
+    if not text1:
+        return len(text2)
+
+    if not text2:
+        return len(text1)
+
+    previous_previous = None
+    previous = list(range(len(text2) + 1))
+
+    for i, char1 in enumerate(text1, start=1):
+        current = [i]
+
+        for j, char2 in enumerate(text2, start=1):
+            cost = 0 if char1 == char2 else 1
+
+            value = min(
+                current[j - 1] + 1,
+                previous[j] + 1,
+                previous[j - 1] + cost,
+            )
+
+            if (
+                previous_previous is not None
+                and i > 1
+                and j > 1
+                and char1 == text2[j - 2]
+                and text1[i - 2] == char2
+            ):
+                value = min(
+                    value,
+                    previous_previous[j - 2] + 1,
+                )
+
+            current.append(value)
+
+        previous_previous = previous
+        previous = current
+
+    return previous[-1]
+
+
+def find_fuzzy_match(
+    model,
+    nazwa,
+    related_name="warianty_nazw",
+):
+    """
+    Szuka istniejącego obiektu o nazwie bardzo podobnej
+    do podanej nazwy.
+
+    Wykrywa przede wszystkim prawdopodobne literówki.
+    """
+
+    nazwa_porownawcza = normalize_for_comparison(nazwa)
+
+    if len(nazwa_porownawcza) < 4:
+        return None
+
+    kandydaci = []
+
+    for obj in model.objects.all():
+        nazwy = [obj.nazwa]
+
+        warianty = getattr(obj, related_name, None)
+
+        if warianty is not None:
+            nazwy.extend(
+                wariant.nazwa
+                for wariant in warianty.all()
+            )
+
+        for kandydat in nazwy:
+            kandydat_porownawczy = normalize_for_comparison(
+                kandydat
+            )
+
+            if kandydat_porownawczy == nazwa_porownawcza:
+                continue
+
+            distance = damerau_levenshtein_distance(
+                nazwa_porownawcza,
+                kandydat_porownawczy,
+            )
+
+            max_distance = 1
+
+            if len(nazwa_porownawcza) >= 10:
+                max_distance = 2
+
+            if distance <= max_distance:
+                kandydaci.append(
+                    (distance, obj, kandydat)
+                )
+
+    if not kandydaci:
+        return None
+
+    kandydaci.sort(
+        key=lambda item: item[0]
+    )
+
+    najlepszy = kandydaci[0]
+
+    return najlepszy[1], najlepszy[2]
+
+def find_fuzzy_person_match(person):
+    """
+    Szuka istniejącej osoby o nazwie bardzo podobnej
+    do podanej osoby.
+
+    Dla osób klasycznych porównuje osobno nazwisko i imiona.
+    Dla osób jednoczłonowych porównuje nazwę.
+    Kwalifikator musi być zgodny dokładnie.
+    """
+
+    kandydaci = []
+
+    for obj in Osoba.objects.all():
+
+        kwalifikator = person.kwalifikator or ""
+
+        if kwalifikator != obj.kwalifikator:
+            continue
+
+        if person.nazwa:
+            if not obj.nazwisko:
+                distance = damerau_levenshtein_distance(
+                    normalize_for_comparison(person.nazwa),
+                    normalize_for_comparison(obj.imiona),
+                )
+
+                if distance <= 1:
+                    kandydaci.append(
+                        (distance, obj, obj.imiona)
+                    )
+
+            continue
+
+        if not obj.nazwisko:
+            continue
+
+        nazwisko_distance = damerau_levenshtein_distance(
+            normalize_for_comparison(person.nazwisko),
+            normalize_for_comparison(obj.nazwisko),
+        )
+
+        imiona_distance = damerau_levenshtein_distance(
+            normalize_for_comparison(person.imiona),
+            normalize_for_comparison(obj.imiona),
+        )
+
+        if (
+            nazwisko_distance <= 1
+            and imiona_distance == 0
+        ):
+            kandydaci.append(
+                (
+                    nazwisko_distance,
+                    obj,
+                    obj.nazwisko,
+                    "nazwisku",
+                )
+            )
+
+        elif (
+            nazwisko_distance == 0
+            and imiona_distance <= 1
+        ):
+            kandydaci.append(
+                (
+                    imiona_distance,
+                    obj,
+                    obj.imiona,
+                    "imieniu",
+                )
+            )
+
+    if not kandydaci:
+        return None
+
+    kandydaci.sort(
+        key=lambda item: item[0]
+    )
+
+    najlepszy = kandydaci[0]
+
+    return najlepszy[1], najlepszy[2], najlepszy[3]
 
 def find_person(person: ParsedPerson):
     """
@@ -469,6 +689,24 @@ def get_or_create_named_object(
             f"Znaleziono więcej niż jeden obiekt: {parsed.nazwa}"
         )
 
+    fuzzy_match = find_fuzzy_match(
+        model=model,
+        nazwa=parsed.nazwa,
+    )
+
+    if fuzzy_match is not None and result is not None:
+        podobny_obj, podobna_nazwa = fuzzy_match
+
+        result.add_warning(
+            message=(
+                f"Możliwa literówka w nazwie: „{parsed.nazwa}”. "
+                f"Istnieje podobny obiekt: „{podobna_nazwa}”. "
+                "Sprawdź poprawność danych i usuń niepoprawne obiekty."
+            ),
+            field=object_type,
+        )
+    
+
     obj = create_named_object(
         model=model,
         parsed=parsed,
@@ -502,6 +740,8 @@ def get_or_create_place(
     place: ParsedName,
     result=None,
 ):
+
+    
     """
     Zwraca istniejące miejsce lub tworzy nowe.
     """
@@ -521,6 +761,24 @@ def get_or_create_place(
     if matches.count() > 1:
         raise ValueError(
             f"Znaleziono więcej niż jedno miejsce: {place}"
+        )
+
+    fuzzy_match = find_fuzzy_match(
+        model=Miejsce,
+        nazwa=place.nazwa,
+    )
+
+    if fuzzy_match is not None and result is not None:
+        podobny_obj, podobna_nazwa = fuzzy_match
+
+        result.add_warning(
+            message=(
+                f"Możliwa literówka w nazwie miejsca: "
+                f"„{place.nazwa}”. "
+                f"Istnieje podobne miejsce: „{podobna_nazwa}”. "
+                "Sprawdź poprawność danych i usuń niepoprawne obiekty."
+            ),
+            field="Miejsce",
         )
 
     miejsce = create_place(place)
@@ -582,6 +840,26 @@ def get_or_create_person(
             f"Znaleziono więcej niż jedną osobę: {person}"
         )
 
+    fuzzy_match = find_fuzzy_person_match(person)
+
+    if fuzzy_match is not None:
+        osoba, podobna_nazwa, rodzaj = fuzzy_match
+
+        if result is not None:
+            result.add_warning(
+                f"Możliwa literówka w {rodzaj} osoby: "
+                f"„{podobna_nazwa}”. "
+                f"Wprowadzono: „{person.nazwa or person.nazwisko + ', ' + person.imiona}”.",
+                field="osoba",
+            )
+
+        add_person_variants(
+            osoba,
+            person,
+        )
+
+        return osoba
+
     osoba = create_person(person)
 
     if result is not None:
@@ -595,10 +873,30 @@ def get_or_create_dictionary_object(
     parsed,
     result=None,
     object_type=None,
+    fuzzy=False,
 ):
     """
     Zwraca obiekt słownikowy lub tworzy nowy.
     """
+
+    if fuzzy:
+        fuzzy_match = find_fuzzy_match(
+            model,
+            parsed.nazwa,
+        )
+
+        if fuzzy_match is not None:
+            obj, podobna_nazwa = fuzzy_match
+
+            if result is not None:
+                result.add_warning(
+                    f"Możliwa literówka w nazwie: "
+                    f"„{parsed.nazwa}”. "
+                    f"Istnieje podobny obiekt: „{podobna_nazwa}”.",
+                    field=object_type,
+                )
+
+            return obj
 
     obj, created = model.objects.get_or_create(
         nazwa=parsed.nazwa,
@@ -619,6 +917,7 @@ def get_or_create_language(
         language,
         result=result,
         object_type="Języki",
+        fuzzy=True,
     )
 
 
