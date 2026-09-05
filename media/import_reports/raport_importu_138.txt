@@ -1,0 +1,23 @@
+RAPORT IMPORTU
+
+Status: Gotowy do importu
+Data: 05.09.2026 00:13:32
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 1
+Egzemplarze: 1
+Załączniki: 0
+
+WALIDACJA
+
+OSTRZEŻENIA:
+- Pusty element listy rozdzielanej średnikiem „;”. | arkusz: Rekordy | wiersz: 16 | pole: gatunki
+- Niesparowany nawias „[]”. | arkusz: Rekordy | wiersz: 16 | pole: powiazane_instytucje
+- Możliwie niepełne dane osoby: „Pietrzycki”. | arkusz: Rekordy | wiersz: 16 | pole: adresaci_dedykacji
+- Pusty element listy rozdzielanej średnikiem „;”. | arkusz: Rekordy | wiersz: 16 | pole: jezyki
+- Rok wydania nie jest zapisany jako liczba czterocyfrowa. | arkusz: Rekordy | wiersz: 16 | pole: rok_wydania
+- Możliwa literówka w danych osoby: „Kowalski”. Wprowadzono: „Kowalski, Jan”. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y)
+- Możliwa literówka w nazwie miejsca: „Kraków”. Istnieje podobne miejsce: „Krakóf”. | arkusz: Rekordy | wiersz: 16 | pole: Miejsce wydania
+- Możliwa literówka w nazwie języka: „łaciński”. Istnieje podobny język: „łacińskii”. | arkusz: Rekordy | wiersz: 16 | pole: Język
+- Możliwa literówka w nazwie biblioteki: „Biblioteka Jagielońska”. Istnieje podobna biblioteka: „Biblioteka Jagiellońska”. | arkusz: Egzemplarze | wiersz: 2 | pole: Biblioteka

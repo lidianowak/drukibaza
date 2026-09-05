@@ -1,0 +1,30 @@
+RAPORT IMPORTU
+
+Status: Zakończony
+Data: 05.09.2026 03:22:46
+Użytkownik: li_duszek
+
+ZAIMPORTOWANO
+Rekordy: 1
+Egzemplarze: 1
+Załączniki: 0
+
+NOWE OBIEKTY
+Osoby: 2
+Instytucje: 1
+Gatunki: 2
+
+WALIDACJA
+
+OSTRZEŻENIA:
+- Pusty element wśród wariantów rozdzielanych średnikiem „;”. | arkusz: Rekordy | wiersz: 16 | pole: miejsce_wydania
+- Pusty element listy rozdzielanej średnikiem „;”. | arkusz: Rekordy | wiersz: 16 | pole: gatunki
+- Niesparowany nawias „[]”. | arkusz: Rekordy | wiersz: 16 | pole: powiazane_instytucje
+- Podejrzany zapis osoby: więcej niż jeden przecinek. Jeśli chodzi o kolejną osobę, użyj średnika „;”. | arkusz: Rekordy | wiersz: 16 | pole: drukarze
+- Możliwie niepełne dane osoby: „Pietrzycki”. | arkusz: Rekordy | wiersz: 16 | pole: adresaci_dedykacji
+- Pusty element listy rozdzielanej średnikiem „;”. | arkusz: Rekordy | wiersz: 16 | pole: jezyki
+- Rok wydania nie jest zapisany jako liczba czterocyfrowa. | arkusz: Rekordy | wiersz: 16 | pole: rok_wydania
+- Możliwa literówka w danych osoby: „Kowalski”. Wprowadzono: „Kowalski, Jan”. | arkusz: Rekordy | wiersz: 16 | pole: Autor(y)
+- Możliwa literówka w nazwie miejsca: „Kraków”. Istnieje podobne miejsce: „Krakóf”. | arkusz: Rekordy | wiersz: 16 | pole: Miejsce wydania
+- Możliwa literówka w nazwie języka: „łaciński”. Istnieje podobny język: „łacińskii”. | arkusz: Rekordy | wiersz: 16 | pole: Język
+- Możliwa literówka w nazwie biblioteki: „Biblioteka Jagielońska”. Istnieje podobna biblioteka: „Biblioteka Jagiellońska”. | arkusz: Egzemplarze | wiersz: 16 | pole: Biblioteka

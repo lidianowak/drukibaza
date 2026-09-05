@@ -38,7 +38,7 @@ def split_variants(text):
 
     Przykład:
 
-    Kochanowski [Cochanovius|Cochanovsky]
+    Kochanowski [Cochanovius; Cochanovsky]
 
     →
 
@@ -60,7 +60,7 @@ def split_variants(text):
 
     variants = [
         v.strip()
-        for v in match.group(2).split("|")
+        for v in match.group(2).split(";")
         if v.strip()
     ]
 
@@ -94,19 +94,45 @@ def split_qualifier(text):
 
 def split_list(text):
     """
-    Rozdziela zapis wielu osób.
+    Rozdziela zapis wielu osób lub obiektów.
 
-    Separator: średnik.
+    Separator: średnik znajdujący się poza nawiasami kwadratowymi.
+    Średnik wewnątrz [] oznacza kolejny wariant.
     """
 
     if not text:
         return []
 
-    return [
-        person.strip()
-        for person in text.split(";")
-        if person.strip()
-    ]
+    items = []
+    current = []
+    depth = 0
+
+    for char in text:
+
+        if char == "[":
+            depth += 1
+
+        elif char == "]":
+            if depth > 0:
+                depth -= 1
+
+        if char == ";" and depth == 0:
+            item = "".join(current).strip()
+
+            if item:
+                items.append(item)
+
+            current = []
+            continue
+
+        current.append(char)
+
+    item = "".join(current).strip()
+
+    if item:
+        items.append(item)
+
+    return items
 
 def split_name(text):
     """
@@ -141,7 +167,7 @@ def parse_named_objects(text):
     """
     Parsuje obiekty zapisane jako:
 
-    Nazwa [wariant1|wariant2];
+    Nazwa [wariant1; wariant2];
     Nazwa2
     """
 

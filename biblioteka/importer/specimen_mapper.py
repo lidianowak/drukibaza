@@ -24,6 +24,10 @@ def map_specimen(record):
 
     for excel_name, value in record.items():
 
+        if excel_name == "_excel_row":
+            mapped["_excel_row"] = value
+            continue
+
         internal_name = SPECIMEN_MAP.get(excel_name)
 
         if internal_name:

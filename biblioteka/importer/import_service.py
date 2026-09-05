@@ -18,6 +18,7 @@ from biblioteka.importer.attachment_builder import create_attachment
 
 from biblioteka.importer.relation_mapper import map_relations
 from biblioteka.importer.relation_builder import create_relations
+from biblioteka.importer.linter import lint_record, normalize_spaces
 
 from biblioteka.models import (
     Rekord,
@@ -468,7 +469,9 @@ def check_fuzzy_specimens(mapped_specimens, result):
     from biblioteka.importer.object_parser import parse_named_objects
     from biblioteka.models import Biblioteka
 
-    for row, mapped in enumerate(mapped_specimens, start=2):
+    for mapped in mapped_specimens:
+
+        row = mapped["_excel_row"]
 
         libraries = parse_named_objects(
             mapped.get("biblioteka") or ""
@@ -529,7 +532,9 @@ def validate_import(
 
     # ---------- Egzemplarze ----------
 
-    for row, mapped in enumerate(mapped_specimens, start=2):
+    for mapped in mapped_specimens:
+
+        row = mapped["_excel_row"]
 
         validator.validate_specimen(
             mapped,
@@ -548,7 +553,9 @@ def validate_import(
 
     # ---------- Załączniki ----------
 
-    for row, mapped in enumerate(mapped_attachments, start=2):
+    for mapped in mapped_attachments:
+
+        row = mapped["_excel_row"]
 
         validator.validate_attachment(
             mapped,
@@ -684,6 +691,28 @@ def run_import(
             map_record(record)
             for record in records
         ]
+
+        for mapped in mapped_records:
+
+            for field_name, value in mapped.items():
+
+                if field_name == "_excel_row":
+                    continue
+
+                mapped[field_name] = normalize_spaces(value)
+
+        for mapped in mapped_records:
+
+            warnings = lint_record(mapped)
+
+            for field_name, message in warnings:
+
+                result.add_warning(
+                    message=message,
+                    sheet="Rekordy",
+                    row=mapped["_excel_row"],
+                    field=field_name,
+                )
 
         check_duplicate_records(
             mapped_records,
